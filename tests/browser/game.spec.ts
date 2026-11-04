@@ -21,10 +21,7 @@ test("complete daily game, resume, all reveals and clipboard fallback", async ({
   await expect(page.getByRole("status")).toContainText("Enter an expression");
   for (let i = 0; i < 7; i++) {
     const tier = i < 5 ? i + 1 : 1;
-    const answer =
-      i === 5
-        ? "invented nonsense"
-        : questions[i].answers.find((a) => a.tier === tier)!.canonical;
+    const answer = questions[i].answers.find((a) => a.tier === tier)!.canonical;
     if (i === 0) {
       const deadline = await page.evaluate(
         (date) =>
@@ -42,12 +39,18 @@ test("complete daily game, resume, all reveals and clipboard fallback", async ({
         ),
       ).toBe(deadline);
     }
-    await page.getByLabel("Your slang expression").fill(answer);
-    await page.getByLabel("Your slang expression").press("Enter");
     if (i === 5) {
+      await page.getByLabel("Your slang expression").fill("invented nonsense");
+      await page.getByLabel("Your slang expression").press("Enter");
+      await expect(page.getByRole("main").getByRole("alert")).toHaveText(
+        "Slang not recognized! Try another word.",
+      );
+      await expect(page.getByLabel("Your slang expression")).toHaveValue(
+        "invented nonsense",
+      );
       await expect(
-        page.getByRole("heading", { name: "No score this round" }),
-      ).toBeVisible();
+        page.getByRole("button", { name: "Next round" }),
+      ).toHaveCount(0);
       await page
         .getByRole("button", { name: "My answer should count" })
         .click();
@@ -60,18 +63,21 @@ test("complete daily game, resume, all reveals and clipboard fallback", async ({
             JSON.parse(localStorage.getItem("slangillion:feedback")!).length,
         ),
       ).toBe(1);
-    } else
-      await expect(page.locator(".points")).toContainText(
-        `+${[10, 25, 50, 75, 100][tier - 1]}`,
-      );
+    }
+    await page.getByLabel("Your slang expression").fill(answer);
+    await expect(page.getByRole("main").getByRole("alert")).toHaveCount(0);
+    await page.getByLabel("Your slang expression").press("Enter");
+    await expect(page.locator(".points")).toContainText(
+      `+${[10, 25, 50, 75, 100][tier - 1]}`,
+    );
     await page
       .getByRole("button", { name: i === 6 ? "See my results" : "Next round" })
       .click();
   }
-  await expect(page.locator(".final-score")).toContainText("270");
+  await expect(page.locator(".final-score")).toContainText("280");
   await expect(page.locator(".result-list>div")).toHaveCount(7);
   await page.reload();
-  await expect(page.locator(".final-score")).toContainText("270");
+  await expect(page.locator(".final-score")).toContainText("280");
   await expect(page.getByRole("button", { name: "Play Daily" })).toHaveCount(0);
   await page.evaluate(() =>
     Object.defineProperty(navigator, "share", {
@@ -82,7 +88,7 @@ test("complete daily game, resume, all reveals and clipboard fallback", async ({
   await page.getByRole("button", { name: "Share your depth" }).click();
   await expect(page.getByRole("status")).toContainText("Results copied");
   expect(await page.evaluate(() => navigator.clipboard.readText())).toContain(
-    "Score: 270/700",
+    "Score: 280/700",
   );
   expect(
     await page.evaluate(

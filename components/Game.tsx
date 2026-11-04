@@ -6,6 +6,7 @@ import {
   advance,
   challengeNumber,
   dailyQuestions,
+  evaluate,
   newGame,
   shareText,
   submit,
@@ -22,6 +23,7 @@ export default function Game() {
     [date, setDate] = useState(""),
     [game, setGame] = useState<GameState | null>(null),
     [answer, setAnswer] = useState(""),
+    [answerError, setAnswerError] = useState(""),
     [now, setNow] = useState(0),
     [notice, setNotice] = useState(""),
     [shareFallback, setShareFallback] = useState(""),
@@ -31,6 +33,7 @@ export default function Game() {
   const dateRef = useRef("");
   const headingRef = useRef<HTMLHeadingElement>(null);
   function save(next: GameState) {
+    setAnswerError("");
     stateRef.current = next;
     setGame(next);
     try {
@@ -78,6 +81,7 @@ export default function Game() {
         if (!next) return;
         stateRef.current = next;
         setGame(next);
+        setAnswerError("");
         try {
           localStorage.setItem(storageKey(next.date), JSON.stringify(next));
         } catch {
@@ -94,6 +98,7 @@ export default function Game() {
       stateRef.current = saved;
       setGame(saved);
       setAnswer("");
+      setAnswerError("");
       setReported(false);
       dateRef.current = saved.date;
       setDate(saved.date);
@@ -127,6 +132,7 @@ export default function Game() {
       current?.phase !== stateRef.current?.phase
     ) {
       setAnswer("");
+      setAnswerError("");
       setReported(false);
     }
     stateRef.current = current;
@@ -150,7 +156,13 @@ export default function Game() {
       return;
     }
     setNotice("");
-    save(submit(state, answer, Date.now()));
+    const nextState = submit(state, answer, Date.now());
+    if (nextState === state) {
+      setAnswerError("Slang not recognized! Try another word.");
+      setReported(false);
+      return;
+    }
+    save(nextState);
     setReported(false);
   }
   function next() {
@@ -173,12 +185,15 @@ export default function Game() {
     const state = syncCurrent();
     if (
       !state ||
-      state.phase !== "reveal" ||
+      !["answer", "reveal"].includes(state.phase) ||
       previous?.date !== state.date ||
       previous.index !== state.index
     )
       return;
-    const result = state.results[state.index];
+    const result =
+      state.phase === "answer" && answerError
+        ? evaluate(dailyQuestions(state.date)[state.index].id, answer)
+        : state.results[state.index];
     if (!result || result.tier || result.timedOut) return;
     try {
       const key = "slangillion:feedback";
@@ -386,13 +401,26 @@ export default function Game() {
                 ref={inputRef}
                 id="answer"
                 value={answer}
-                onChange={(e) => setAnswer(e.target.value)}
+                onChange={(e) => {
+                  setAnswer(e.target.value);
+                  setAnswerError("");
+                  setReported(false);
+                  if (notice === "Enter an expression before submitting.")
+                    setNotice("");
+                }}
+                aria-invalid={!!answerError}
+                aria-describedby={answerError ? "answer-error" : undefined}
                 maxLength={80}
                 autoComplete="off"
                 autoCapitalize="none"
                 spellCheck={false}
                 placeholder="Go beyond the obvious…"
               />
+              {answerError && (
+                <p id="answer-error" className="rejection" role="alert">
+                  {answerError}
+                </p>
+              )}
               <button className="primary" type="submit">
                 Lock it in{" "}
                 <span>
@@ -400,7 +428,16 @@ export default function Game() {
                 </span>
               </button>
             </form>
-            <p className="hint">ONE SHOT. TRUST YOUR VOCABULARY.</p>
+            {answerError && (
+              <button
+                className="text-button"
+                onClick={report}
+                disabled={reported}
+              >
+                {reported ? "Feedback saved ✓" : "My answer should count"}
+              </button>
+            )}
+            <p className="hint">ONE LOCKED ANSWER. KEEP DIGGING.</p>
           </section>
         ) : game.phase === "reveal" ? (
           <section
@@ -500,7 +537,9 @@ export default function Game() {
                   <span className="result-index">0{i + 1}</span>
                   <div>
                     <small>{r.questionId}</small>
-                    <strong>{r.answer || "No answer"}</strong>
+                    <strong title={r.answer}>
+                      {r.canonical || r.answer || "No answer"}
+                    </strong>
                   </div>
                   <span
                     className="result-tier"

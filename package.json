@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test": "node --import tsx --test tests/*.test.ts",
     "test:browser": "playwright test",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "docs:slang": "node --import tsx scripts/generate-slang-report.ts"
   },
   "dependencies": {
     "next": "^16.0.0",

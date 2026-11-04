@@ -1,4 +1,7 @@
 import { QUESTIONS, type Tier } from "./data";
+import { QUESTIONS as LEGACY_QUESTIONS } from "./legacy-data";
+import { recognize } from "./recognition";
+export { normalize } from "./recognition";
 export const ROUND_MS = 25_000;
 export type Result = {
   questionId: string;
@@ -7,9 +10,10 @@ export type Result = {
   tier: Tier | null;
   points: number;
   timedOut: boolean;
+  recognitionVersion?: 2;
 };
 export type GameState = {
-  version: 1;
+  version: 1 | 2;
   date: string;
   index: number;
   phase: "answer" | "reveal" | "complete";
@@ -37,30 +41,47 @@ export function dailyQuestions(date: string) {
   }
   return pool.slice(0, 7);
 }
-export const normalize = (s: string) =>
-  s
-    .normalize("NFKC")
-    .toLowerCase()
-    .replace(/[’']/g, "")
-    .replace(/[^\p{L}\p{N}\s]/gu, " ")
-    .trim()
-    .replace(/\s+/g, " ");
 export function evaluate(
   questionId: string,
   input: string,
   timedOut = false,
 ): Result {
-  const q = QUESTIONS.find((q) => q.id === questionId);
-  const normalized = normalize(input);
-  const a =
-    timedOut || !normalized
-      ? undefined
-      : q?.answers.find((a) =>
-          [a.canonical, ...a.variants].some((v) => normalize(v) === normalized),
-        );
+  const a = timedOut ? undefined : recognize(questionId, input)?.answer;
   return {
     questionId,
     answer: input.trim().slice(0, 80),
+    canonical: a?.canonical ?? null,
+    tier: a?.tier ?? null,
+    points: a?.points ?? 0,
+    timedOut,
+    recognitionVersion: 2,
+  };
+}
+// Original stored rounds are validated against their original editorial scores.
+// They are never rescored or erased when the current bank changes.
+function evaluateLegacy(
+  questionId: string,
+  input: string,
+  timedOut: boolean,
+): Result {
+  const legacyNormalize = (s: string) =>
+    s
+      .normalize("NFKC")
+      .toLowerCase()
+      .replace(/[’']/g, "")
+      .replace(/[^\p{L}\p{N}\s]/gu, " ")
+      .trim()
+      .replace(/\s+/g, " ");
+  const key = legacyNormalize(input);
+  const a =
+    timedOut || !key
+      ? undefined
+      : LEGACY_QUESTIONS.find((q) => q.id === questionId)?.answers.find((a) =>
+          [a.canonical, ...a.variants].some((v) => legacyNormalize(v) === key),
+        );
+  return {
+    questionId,
+    answer: input,
     canonical: a?.canonical ?? null,
     tier: a?.tier ?? null,
     points: a?.points ?? 0,
@@ -69,7 +90,7 @@ export function evaluate(
 }
 export function newGame(date = utcDate(), now = Date.now()): GameState {
   return {
-    version: 1,
+    version: 2,
     date,
     index: 0,
     phase: "answer",
@@ -88,6 +109,7 @@ export function submit(
     input,
     now >= state.deadline,
   );
+  if (!result.timedOut && !result.tier) return state;
   return { ...state, phase: "reveal", results: [...state.results, result] };
 }
 export function advance(state: GameState, now = Date.now()): GameState {
@@ -106,7 +128,7 @@ export function restore(raw: string | null, date: string): GameState | null {
     if (!raw) return null;
     const s = JSON.parse(raw) as GameState;
     if (
-      s.version !== 1 ||
+      (s.version !== 1 && s.version !== 2) ||
       s.date !== date ||
       !Number.isInteger(s.index) ||
       s.index < 0 ||
@@ -126,7 +148,14 @@ export function restore(raw: string | null, date: string): GameState | null {
         r.questionId !== questions[i].id
       )
         return null;
-      const checked = evaluate(r.questionId, r.answer, r.timedOut);
+      if (r.recognitionVersion !== undefined && r.recognitionVersion !== 2)
+        return null;
+      const checked =
+        r.recognitionVersion === 2
+          ? evaluate(r.questionId, r.answer, r.timedOut)
+          : evaluateLegacy(r.questionId, r.answer, r.timedOut);
+      if (r.recognitionVersion === 2 && !r.timedOut && !checked.tier)
+        return null;
       if (
         checked.points !== r.points ||
         checked.tier !== r.tier ||
