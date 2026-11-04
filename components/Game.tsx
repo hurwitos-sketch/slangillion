@@ -7,7 +7,6 @@ import {
   challengeNumber,
   dailyQuestions,
   newGame,
-  restore,
   shareText,
   submit,
   total,
@@ -16,7 +15,8 @@ import {
 } from "@/lib/game";
 import Environment from "./Environment";
 import Arrow from "./Arrow";
-const storageKey = (date: string) => `slangillion:v1:${date}`;
+import { readProgress, storageKey } from "@/lib/storage";
+import { shareResults } from "@/lib/share";
 export default function Game() {
   const [ready, setReady] = useState(false),
     [date, setDate] = useState(""),
@@ -29,6 +29,7 @@ export default function Game() {
   const stateRef = useRef<GameState | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const dateRef = useRef("");
+  const headingRef = useRef<HTMLHeadingElement>(null);
   function save(next: GameState) {
     stateRef.current = next;
     setGame(next);
@@ -44,12 +45,7 @@ export default function Game() {
     const init = setTimeout(() => {
       const today = utcDate();
       const time = Date.now();
-      let saved: GameState | null = null;
-      try {
-        saved = restore(localStorage.getItem(storageKey(today)), today);
-      } catch {
-        /* handled by next save */
-      }
+      const saved = readProgress(today);
       stateRef.current = saved;
       setGame(saved);
       setDate(today);
@@ -64,8 +60,9 @@ export default function Game() {
       if (dateRef.current && dateRef.current !== today) {
         dateRef.current = today;
         setDate(today);
-        stateRef.current = null;
-        setGame(null);
+        const saved = readProgress(today);
+        stateRef.current = saved;
+        setGame(saved);
         setAnswer("");
         setShareFallback("");
         setReported(false);
@@ -73,7 +70,12 @@ export default function Game() {
       }
       const state = stateRef.current;
       if (state?.phase === "answer" && time >= state.deadline) {
-        const next = submit(state, "", time);
+        const latest = readProgress(today, state);
+        const next =
+          latest?.phase === "answer" && time >= latest.deadline
+            ? submit(latest, "", time)
+            : latest;
+        if (!next) return;
         stateRef.current = next;
         setGame(next);
         try {
@@ -87,12 +89,14 @@ export default function Game() {
     document.addEventListener("visibilitychange", tick);
     const sync = (event: StorageEvent) => {
       if (event.key !== storageKey(utcDate())) return;
-      const saved = restore(event.newValue, utcDate());
-      if (!saved) return;
+      const saved = readProgress(utcDate(), stateRef.current);
+      if (!saved || saved === stateRef.current) return;
       stateRef.current = saved;
       setGame(saved);
       setAnswer("");
       setReported(false);
+      dateRef.current = saved.date;
+      setDate(saved.date);
     };
     window.addEventListener("storage", sync);
     return () => {
@@ -104,9 +108,42 @@ export default function Game() {
   }, []);
   useEffect(() => {
     if (game?.phase === "answer") inputRef.current?.focus();
+    else if (game?.phase) headingRef.current?.focus();
   }, [game?.index, game?.phase]);
+  // Read storage before acting: another tab may have locked or advanced a round
+  // while this tab was suspended and its storage event was still queued.
+  function syncCurrent() {
+    const today = utcDate();
+    const current = readProgress(today, stateRef.current);
+    if (today !== dateRef.current) {
+      dateRef.current = today;
+      setDate(today);
+      setAnswer("");
+      setShareFallback("");
+    }
+    if (
+      current?.date !== stateRef.current?.date ||
+      current?.index !== stateRef.current?.index ||
+      current?.phase !== stateRef.current?.phase
+    ) {
+      setAnswer("");
+      setReported(false);
+    }
+    stateRef.current = current;
+    setGame(current);
+    setNow(Date.now());
+    return current;
+  }
+  function start() {
+    const saved = syncCurrent();
+    setNotice("");
+    if (!saved) save(newGame(utcDate()));
+  }
   function lock() {
-    const state = stateRef.current;
+    const previous = stateRef.current;
+    const state = syncCurrent();
+    if (previous?.date !== state?.date || previous?.index !== state?.index)
+      return;
     if (!state || state.phase !== "answer") return;
     if (!answer.trim()) {
       setNotice("Enter an expression before submitting.");
@@ -117,21 +154,38 @@ export default function Game() {
     setReported(false);
   }
   function next() {
-    const state = stateRef.current;
-    if (!state) return;
+    const previous = stateRef.current;
+    const state = syncCurrent();
+    if (
+      !state ||
+      previous?.date !== state.date ||
+      previous.index !== state.index ||
+      state.phase !== "reveal"
+    )
+      return;
     save(advance(state));
     setAnswer("");
     setNotice("");
     setReported(false);
   }
   function report() {
-    const state = stateRef.current;
-    if (!state) return;
+    const previous = stateRef.current;
+    const state = syncCurrent();
+    if (
+      !state ||
+      state.phase !== "reveal" ||
+      previous?.date !== state.date ||
+      previous.index !== state.index
+    )
+      return;
+    const result = state.results[state.index];
+    if (!result || result.tier || result.timedOut) return;
     try {
       const key = "slangillion:feedback";
       const raw = JSON.parse(localStorage.getItem(key) || "[]");
-      const reports = Array.isArray(raw) ? raw : [];
-      const result = state.results[state.index];
+      const reports = Array.isArray(raw)
+        ? raw.filter((entry) => entry && typeof entry === "object")
+        : [];
       if (
         !reports.some(
           (r: { date: string; questionId: string }) =>
@@ -155,18 +209,14 @@ export default function Game() {
   async function share() {
     if (!game) return;
     const text = shareText(game, window.location.origin);
-    try {
-      if (navigator.share) {
-        await navigator.share({ text });
-        setNotice("Results shared.");
-      } else if (navigator.clipboard) {
-        await navigator.clipboard.writeText(text);
-        setNotice("Results copied. Send them to your group chat.");
-      } else setShareFallback(text);
-    } catch (e) {
-      if (!(e instanceof DOMException && e.name === "AbortError"))
-        setShareFallback(text);
-    }
+    setNotice("");
+    setShareFallback("");
+    const outcome = await shareResults(text);
+    if (dateRef.current !== game.date) return;
+    if (outcome === "shared") setNotice("Results shared.");
+    if (outcome === "copied")
+      setNotice("Results copied. Send them to your group chat.");
+    if (outcome === "manual") setShareFallback(text);
   }
   const result = game?.results[game.index];
   const tier = result?.tier;
@@ -219,10 +269,7 @@ export default function Game() {
                   Seven prompts. 25 seconds each. Drop the rarest slang you
                   know. The deeper you go, the bigger you score.
                 </p>
-                <button
-                  className="primary play"
-                  onClick={() => save(newGame(date))}
-                >
+                <button className="primary play" onClick={start}>
                   Play Daily{" "}
                   <span>
                     <Arrow />
@@ -382,7 +429,9 @@ export default function Game() {
                     ? "ANSWER LOCKED"
                     : "NOT IN OUR ANSWER BANK"}
               </div>
-              <h1>{result?.canonical || result?.answer || "Silence."}</h1>
+              <h1 ref={headingRef} tabIndex={-1}>
+                {result?.canonical || result?.answer || "Silence."}
+              </h1>
               <h2>
                 {tier
                   ? `${TIERS[tier - 1].icon} ${TIERS[tier - 1].name}`
@@ -418,7 +467,7 @@ export default function Game() {
             <div className="eyebrow">
               DAILY #{number} / THE DESCENT IS COMPLETE
             </div>
-            <h1>
+            <h1 ref={headingRef} tabIndex={-1}>
               You went <em>deep.</em>
             </h1>
             <div className="final-score">

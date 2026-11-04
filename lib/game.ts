@@ -141,6 +141,23 @@ export function restore(raw: string | null, date: string): GameState | null {
 }
 export const total = (s: GameState) =>
   s.results.reduce((sum, r) => sum + r.points, 0);
+// Keep delayed events from rewinding a day's progress. On equal stages, storage
+// is authoritative, except an active round must never gain a later deadline.
+export function reconcileProgress(
+  local: GameState | null,
+  stored: GameState | null,
+): GameState | null {
+  if (!local) return stored;
+  if (!stored || local.date !== stored.date) return local;
+  const stage = (state: GameState) =>
+    state.index * 2 +
+    (state.phase === "answer" ? 0 : state.phase === "reveal" ? 1 : 2);
+  if (stage(local) !== stage(stored))
+    return stage(local) > stage(stored) ? local : stored;
+  if (local.phase === "answer" && local.deadline < stored.deadline)
+    return local;
+  return JSON.stringify(local) === JSON.stringify(stored) ? local : stored;
+}
 export function shareText(s: GameState, url: string) {
   const icons = ["🩶", "🩵", "💜", "🧡", "❤️"];
   return `SLANGILLION #${String(challengeNumber(s.date)).padStart(3, "0")}\nHow deep is your slang?\nScore: ${total(s)}/700\n${s.results.map((r) => (r.tier ? icons[r.tier - 1] : "⬛")).join(" ")}\nCan you go deeper?\n${url}`;

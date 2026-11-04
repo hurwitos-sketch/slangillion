@@ -23,7 +23,7 @@ npm run build
 npm run test:browser
 ```
 
-The browser suite starts the production server, so build first. It tests desktop and iPhone-sized Chromium using `/usr/bin/chromium`. To use Playwright-managed browsers on another machine, remove `executablePath` in `playwright.config.ts` and run `npx playwright install chromium`. The iPhone project checks mobile layout and touch emulation in Chromium; it does not test Safari or a physical device.
+The browser suite starts a dedicated production server on port 3100, so build first. It refuses to reuse a running server, preventing tests from silently checking an old build. It tests desktop and iPhone-sized Chromium using `/usr/bin/chromium`. To use Playwright-managed browsers on another machine, remove `executablePath` in `playwright.config.ts` and run `npx playwright install chromium`. The iPhone project checks mobile layout and touch emulation in Chromium; it does not test Safari or a physical device.
 
 ## Rules and persistence
 
@@ -31,7 +31,7 @@ Seven unique prompts are selected deterministically from the ISO UTC date with a
 
 `lib/data.ts` contains 15 categories and editable canonical answers, aliases, associated prompt IDs, five rarity tiers, point values, explanations, and editorial review status. All rarity assignments are **provisional editorial estimates**, not measured player frequencies. Regional expressions are equally valid when accepted. Editorial review status describes this MVP curation, not independent linguistic verification. The bank is intentionally finite: a rejected expression may still be genuine slang. The feedback button records it only on the current device under `slangillion:feedback`; there is no server or review queue receiving it. Some expressions contain adult language.
 
-`lib/game.ts` owns normalization, deterministic selection, scoring, state transitions, saved-state validation, and spoiler-free sharing independently of React. `components/Game.tsx` handles browser storage and the game UI; `components/Environment.tsx` contains the five original illustrated environments. Native sharing is used when available, with clipboard and selectable-text fallbacks. No player rankings or measured frequencies are invented.
+`lib/game.ts` owns normalization, deterministic selection, scoring, state transitions, saved-state validation, and spoiler-free sharing independently of React. `components/Game.tsx` handles browser storage and the game UI; `components/Environment.tsx` contains the five original illustrated environments. Native sharing is used when available, with clipboard and selectable-text fallbacks. Cancellation leaves the share sheet closed without copying. Tabs reconcile saved progress before actions and ignore delayed events that would rewind a round. No player rankings or measured frequencies are invented.
 
 localStorage is not anti-cheat protection: clearing storage, modifying the clock/state, or using another device can bypass daily limits. Private browsing, storage restrictions, and device changes affect persistence. A production competitive game needs server-side dates, scoring, and progress. There is no analytics or remote collection.
 

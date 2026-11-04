@@ -3,7 +3,7 @@ export default defineConfig({
   testDir: "./tests/browser",
   fullyParallel: true,
   use: {
-    baseURL: "http://127.0.0.1:3000",
+    baseURL: "http://127.0.0.1:3100",
     launchOptions: {
       executablePath: "/usr/bin/chromium",
       args: ["--no-sandbox"],
@@ -18,9 +18,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npm run start",
-    url: "http://127.0.0.1:3000",
-    reuseExistingServer: !process.env.CI,
+    command: "npm run start -- --port 3100",
+    url: "http://127.0.0.1:3100",
+    reuseExistingServer: false,
   },
   reporter: "list",
 });

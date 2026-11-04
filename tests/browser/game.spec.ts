@@ -171,3 +171,241 @@ test("native sharing and manual copy fallback", async ({ page }) => {
     page.getByRole("textbox", { name: "Copy your results" }),
   ).toContainText("SLANGILLION");
 });
+
+test("delayed storage events cannot rewind a round or erase a draft", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Play Daily" }).click();
+  const date = await page.evaluate(() => new Date().toISOString().slice(0, 10));
+  const old = await page.evaluate(
+    (date) => localStorage.getItem(`slangillion:v1:${date}`)!,
+    date,
+  );
+  await page
+    .getByLabel("Your slang expression")
+    .fill(dailyQuestions(date)[0].answers[0].canonical);
+  await page.getByLabel("Your slang expression").press("Enter");
+  await page.getByRole("button", { name: "Next round" }).click();
+  await page.getByLabel("Your slang expression").fill("draft answer");
+  await page.evaluate(
+    ({ date, old }) =>
+      window.dispatchEvent(
+        new StorageEvent("storage", {
+          key: `slangillion:v1:${date}`,
+          newValue: old,
+        }),
+      ),
+    { date, old },
+  );
+  await expect(page.locator(".game-top")).toContainText("ROUND 2 OF 7");
+  await expect(page.getByLabel("Your slang expression")).toHaveValue(
+    "draft answer",
+  );
+});
+
+test("failed native share falls back to clipboard; cancellation is quiet", async ({
+  page,
+  context,
+}) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  const { newGame, submit, advance } = await import("../../lib/game");
+  const date = new Date().toISOString().slice(0, 10);
+  let state = newGame(date);
+  for (const q of dailyQuestions(date))
+    state = advance(submit(state, q.answers[0].canonical, state.deadline - 1));
+  await page.goto("/");
+  await page.evaluate(
+    (state) =>
+      localStorage.setItem(
+        `slangillion:v1:${state.date}`,
+        JSON.stringify(state),
+      ),
+    state,
+  );
+  await page.reload();
+  await page.evaluate(() =>
+    Object.defineProperty(navigator, "share", {
+      configurable: true,
+      value: async () => {
+        throw new DOMException("Not supported", "NotSupportedError");
+      },
+    }),
+  );
+  await page.getByRole("button", { name: "Share your depth" }).click();
+  await expect(page.getByRole("status")).toContainText("Results copied");
+  await page.evaluate(() =>
+    Object.defineProperty(navigator, "share", {
+      configurable: true,
+      value: async () => {
+        throw new DOMException("Cancelled", "AbortError");
+      },
+    }),
+  );
+  await page.getByRole("button", { name: "Share your depth" }).click();
+  await expect(page.getByRole("status")).toHaveCount(0);
+  await expect(
+    page.getByRole("textbox", { name: "Copy your results" }),
+  ).toHaveCount(0);
+});
+
+test("storage failures keep the game playable and show an honest warning", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    Storage.prototype.setItem = () => {
+      throw new DOMException("Full", "QuotaExceededError");
+    };
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Play Daily" }).click();
+  await expect(page.getByRole("status")).toContainText(
+    "progress cannot be saved",
+  );
+  const date = await page.evaluate(() => new Date().toISOString().slice(0, 10));
+  await page
+    .getByLabel("Your slang expression")
+    .fill(dailyQuestions(date)[0].answers[0].canonical);
+  await page.getByLabel("Your slang expression").press("Enter");
+  await expect(page.locator(".points")).toContainText("+10");
+});
+
+test("multiple tabs share locked answers without duplicating points", async ({
+  page,
+  context,
+}) => {
+  await page.goto("/");
+  const other = await context.newPage();
+  await other.goto("/");
+  await page.getByRole("button", { name: "Play Daily" }).click();
+  await expect(other.getByLabel("Your slang expression")).toBeVisible();
+  const date = await page.evaluate(() => new Date().toISOString().slice(0, 10));
+  await page
+    .getByLabel("Your slang expression")
+    .fill(dailyQuestions(date)[0].answers[0].canonical);
+  await page.getByLabel("Your slang expression").press("Enter");
+  await expect(other.locator(".points")).toContainText("+10");
+  await other.getByRole("button", { name: "Next round" }).click();
+  await expect(page.locator(".game-top")).toContainText("ROUND 2 OF 7");
+  expect(
+    await page.evaluate(
+      (date) =>
+        JSON.parse(localStorage.getItem(`slangillion:v1:${date}`)!).results
+          .length,
+      date,
+    ),
+  ).toBe(1);
+  await other.close();
+});
+
+test("keyboard focus follows reveals, next round, and results", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Play Daily" }).click();
+  await expect(page.getByLabel("Your slang expression")).toBeFocused();
+  const date = await page.evaluate(() => new Date().toISOString().slice(0, 10));
+  await page
+    .getByLabel("Your slang expression")
+    .fill(dailyQuestions(date)[0].answers[0].canonical);
+  await page.getByLabel("Your slang expression").press("Enter");
+  await expect(page.locator(".reveal h1")).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("button", { name: "Next round" })).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page.getByLabel("Your slang expression")).toBeFocused();
+});
+
+test("phone widths and reduced motion keep the game usable", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  for (const width of [320, 360, 390, 768, 1440]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto("/");
+    await expect(
+      page.getByRole("button", { name: "Play Daily" }),
+    ).toBeVisible();
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+  }
+  await page.setViewportSize({ width: 320, height: 640 });
+  await page.getByRole("button", { name: "Play Daily" }).click();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+});
+
+test("midnight restores an already-started new daily instead of restarting it", async ({
+  page,
+}) => {
+  await page.clock.install({ time: new Date("2026-11-04T23:59:59Z") });
+  await page.goto("/");
+  await expect(page.getByRole("button", { name: "Play Daily" })).toBeVisible();
+  const { newGame, submit, advance } = await import("../../lib/game");
+  const date = "2026-11-05";
+  let state = newGame(date, Date.parse("2026-11-05T00:00:00Z"));
+  state = advance(
+    submit(
+      state,
+      dailyQuestions(date)[0].answers[0].canonical,
+      state.deadline - 1,
+    ),
+    Date.parse("2026-11-05T00:00:01Z"),
+  );
+  await page.evaluate(
+    (state) =>
+      localStorage.setItem(
+        `slangillion:v1:${state.date}`,
+        JSON.stringify(state),
+      ),
+    state,
+  );
+  await page.clock.fastForward(1500);
+  await expect(page.locator(".game-top")).toContainText("ROUND 2 OF 7");
+  await expect(page.getByRole("button", { name: "Play Daily" })).toHaveCount(0);
+});
+
+test("a queued cross-tab update cannot submit an old answer to the next prompt", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Play Daily" }).click();
+  await page.getByLabel("Your slang expression").fill("old draft");
+  const { submit, advance } = await import("../../lib/game");
+  const state = await page.evaluate(() =>
+    JSON.parse(
+      localStorage.getItem(
+        `slangillion:v1:${new Date().toISOString().slice(0, 10)}`,
+      )!,
+    ),
+  );
+  const next = advance(
+    submit(
+      state,
+      dailyQuestions(state.date)[0].answers[0].canonical,
+      state.deadline - 1,
+    ),
+  );
+  await page.evaluate(
+    (next) =>
+      localStorage.setItem(`slangillion:v1:${next.date}`, JSON.stringify(next)),
+    next,
+  );
+  await page.getByRole("button", { name: "Lock it in" }).click();
+  await expect(page.locator(".game-top")).toContainText("ROUND 2 OF 7");
+  await expect(page.getByLabel("Your slang expression")).toHaveValue("");
+  expect(
+    await page.evaluate(
+      (date) =>
+        JSON.parse(localStorage.getItem(`slangillion:v1:${date}`)!).results
+          .length,
+      state.date,
+    ),
+  ).toBe(1);
+});
