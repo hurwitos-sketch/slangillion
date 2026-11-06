@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { TIERS, type Tier } from "@/lib/data";
+import { TIERS } from "@/lib/data";
 import {
   advance,
   challengeNumber,
@@ -18,6 +18,18 @@ import Environment from "./Environment";
 import Arrow from "./Arrow";
 import { readProgress, storageKey } from "@/lib/storage";
 import { shareResults } from "@/lib/share";
+import Welcome from "./Welcome";
+import CharacterArt from "./CharacterArt";
+import CharacterDialog from "./CharacterDialog";
+import {
+  CHARACTER_KEY,
+  DEFAULT_CHARACTER,
+  characterId,
+  getCharacter,
+  characterArt,
+  type CharacterId,
+} from "@/lib/characters";
+import Image from "next/image";
 export default function Game() {
   const [ready, setReady] = useState(false),
     [date, setDate] = useState(""),
@@ -27,7 +39,11 @@ export default function Game() {
     [now, setNow] = useState(0),
     [notice, setNotice] = useState(""),
     [shareFallback, setShareFallback] = useState(""),
-    [reported, setReported] = useState(false);
+    [reported, setReported] = useState(false),
+    [selectedCharacter, setSelectedCharacter] =
+      useState<CharacterId>(DEFAULT_CHARACTER),
+    [welcomeOpen, setWelcomeOpen] = useState(true),
+    [selectorOpen, setSelectorOpen] = useState(false);
   const stateRef = useRef<GameState | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const dateRef = useRef("");
@@ -53,6 +69,13 @@ export default function Game() {
       setGame(saved);
       setDate(today);
       setNow(time);
+      try {
+        const savedCharacter = characterId(localStorage.getItem(CHARACTER_KEY));
+        setSelectedCharacter(savedCharacter);
+        localStorage.setItem(CHARACTER_KEY, savedCharacter);
+      } catch {
+        /* Cosmetic selection remains usable without storage. */
+      }
       setReady(true);
       dateRef.current = today;
     }, 0);
@@ -69,6 +92,8 @@ export default function Game() {
         setAnswer("");
         setShareFallback("");
         setReported(false);
+        setWelcomeOpen(true);
+        setSelectorOpen(false);
         setNotice("A new daily challenge is here.");
       }
       const state = stateRef.current;
@@ -112,9 +137,10 @@ export default function Game() {
     };
   }, []);
   useEffect(() => {
+    if (welcomeOpen || selectorOpen) return;
     if (game?.phase === "answer") inputRef.current?.focus();
     else if (game?.phase) headingRef.current?.focus();
-  }, [game?.index, game?.phase]);
+  }, [game?.index, game?.phase, welcomeOpen, selectorOpen]);
   // Read storage before acting: another tab may have locked or advanced a round
   // while this tab was suspended and its storage event was still queued.
   function syncCurrent() {
@@ -144,6 +170,17 @@ export default function Game() {
     const saved = syncCurrent();
     setNotice("");
     if (!saved) save(newGame(utcDate()));
+    setWelcomeOpen(false);
+  }
+  function selectCharacter(id: CharacterId) {
+    setSelectedCharacter(id);
+    try {
+      localStorage.setItem(CHARACTER_KEY, id);
+    } catch {
+      setNotice(
+        "Character changed for this visit. Your browser could not save this preference.",
+      );
+    }
   }
   function lock() {
     const previous = stateRef.current;
@@ -245,7 +282,9 @@ export default function Game() {
     : 0;
   const resetTime = new Date(until).toISOString().slice(11, 19);
   return (
-    <div className="site-shell">
+    <div
+      className={`site-shell ${ready && (welcomeOpen || !game) ? "welcome-shell" : ""}`}
+    >
       <header>
         <Link className="wordmark" href="/" aria-label="Slangillion home">
           SLANG<span>ILLION</span>
@@ -255,112 +294,47 @@ export default function Game() {
         </Link>
         <div className="header-right">
           <span className="live-dot" /> DAILY DROP <b>#{number}</b>
+          {ready && !welcomeOpen && game && (
+            <button
+              className="avatar-control"
+              aria-label={`Change character, current ${getCharacter(selectedCharacter).name}`}
+              onClick={() => setSelectorOpen(true)}
+            >
+              <Image
+                src={characterArt(selectedCharacter, true)}
+                width={56}
+                height={44}
+                unoptimized
+                alt=""
+              />
+              <span>{getCharacter(selectedCharacter).name}</span>
+              <span aria-hidden="true">⌄</span>
+            </button>
+          )}
         </div>
       </header>
       <main>
         {!ready ? (
           <div className="loading">Finding the entrance…</div>
-        ) : !game ? (
-          <>
-            <section className="landing-grid">
-              <div className="hero-copy">
-                <div className="eyebrow">
-                  <span /> A DAILY GAME FOR THE CULTURE
-                </div>
-                <h1>
-                  How deep
-                  <br />
-                  is your <em>slang?</em>
-                  <span className="scribble">
-                    <Arrow down />
-                  </span>
-                </h1>
-                <p className="intro">
-                  Everyone knows the obvious.
-                  <br />
-                  The real ones go <strong>underground.</strong>
-                </p>
-                <p className="description">
-                  Seven prompts. 25 seconds each. Drop the rarest slang you
-                  know. The deeper you go, the bigger you score.
-                </p>
-                <button className="primary play" onClick={start}>
-                  Play Daily{" "}
-                  <span>
-                    <Arrow />
-                  </span>
-                </button>
-                <div className="play-caption">
-                  NO SIGNUP. JUST STREET KNOWLEDGE.
-                </div>
-              </div>
-              <div className="hero-visual">
-                <div className="art-top">
-                  <span>↓ BELOW THE SURFACE</span>
-                  <span>EST. 2026</span>
-                </div>
-                <Environment hero />
-                <div className="art-bottom">
-                  <div>
-                    <small>THE RAREST WORDS LIVE</small>
-                    <strong>WHERE THE LIGHTS DON’T.</strong>
-                  </div>
-                  <span>✦</span>
-                </div>
-                <span className="sticker">
-                  GO
-                  <br />
-                  DEEPER.
-                </span>
-              </div>
-            </section>
-            <section className="depth-section">
-              <div className="section-heading">
-                <h2>
-                  FIVE LEVELS. <span>ONE WAY DOWN.</span>
-                </h2>
-                <span>RARER SLANG. HIGHER SCORE. ↓</span>
-              </div>
-              <div className="tier-grid">
-                {TIERS.map((t, i) => (
-                  <div
-                    className="tier-card"
-                    key={t.name}
-                    style={{ "--tier": t.color } as React.CSSProperties}
-                  >
-                    <div className="tier-top">
-                      <span className="tier-symbol">{t.icon}</span>
-                      <small>0{i + 1}</small>
-                    </div>
-                    <h3>{t.name}</h3>
-                    <p>
-                      {t.points}
-                      <span> PTS</span>
-                    </p>
-                    <div className="depth-line" />
-                  </div>
-                ))}
-              </div>
-              <p className="editorial">
-                Rarity is curated, not calculated from player stats. Every
-                region has a voice.
-              </p>
-            </section>
-            <section className="how">
-              <span>THE DAILY RITUAL</span>
-              <p>
-                <b>01</b> Read the prompt
-              </p>
-              <p>
-                <b>02</b> Drop your slang
-              </p>
-              <p>
-                <b>03</b> Discover your depth
-              </p>
-            </section>
-          </>
+        ) : !game || welcomeOpen ? (
+          <Welcome
+            selected={selectedCharacter}
+            onSelect={selectCharacter}
+            onPlay={start}
+            status={
+              game?.phase === "complete" ? "complete" : game ? "resume" : "new"
+            }
+            number={number}
+          />
         ) : game.phase === "answer" ? (
-          <section className="game-panel">
+          <section className="game-panel game-entry">
+            <div className="game-companion">
+              <CharacterArt id={selectedCharacter} />
+              <span>
+                {getCharacter(selectedCharacter).name}{" "}
+                <small>IS ON THE DESCENT</small>
+              </span>
+            </div>
             <div className="game-top">
               <span>
                 DAILY #{number} <i>/</i> ROUND {game.index + 1} OF 7
@@ -457,7 +431,13 @@ export default function Game() {
               </strong>
             </div>
             <Progress index={game.index} />
-            <Environment tier={tier || 1} />
+            <div className="reveal-environment">
+              <Environment tier={tier || 1} />
+              <CharacterArt
+                id={selectedCharacter}
+                className="reveal-character"
+              />
+            </div>
             <div className="reveal-copy" aria-live="polite">
               <div className="eyebrow">
                 {result?.timedOut
@@ -501,6 +481,10 @@ export default function Game() {
           </section>
         ) : (
           <section className="game-panel results">
+            <div className="results-companion">
+              <CharacterArt id={selectedCharacter} />
+              <span>{getCharacter(selectedCharacter).name}</span>
+            </div>
             <div className="eyebrow">
               DAILY #{number} / THE DESCENT IS COMPLETE
             </div>
@@ -587,6 +571,13 @@ export default function Game() {
           </p>
         )}
       </main>
+      {selectorOpen && (
+        <CharacterDialog
+          selected={selectedCharacter}
+          onSelect={selectCharacter}
+          onClose={() => setSelectorOpen(false)}
+        />
+      )}
       <footer>
         <span>
           SLANG IS A LANGUAGE. <b>DEPTH IS A FLEX.</b>

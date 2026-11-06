@@ -49,3 +49,11 @@ localStorage is not anti-cheat protection: clearing storage, modifying the clock
 Before wider launch, expand and independently review the regional answer bank, check accessibility with assistive technology, and test on real Safari/iPhone and Android devices. Leaderboards, accounts, practice, analytics, multiplayer, and player-frequency scoring are deliberately outside this MVP.
 
 The requested reference site could not be accessed in the build environment (network policy returned HTTP 403); implementation follows the supplied specification and uses original visuals.
+
+## Character selection and welcome screen
+
+The welcome screen offers eight cosmetic characters: COURIER, MC, PATHFINDER, TAG, KICKFLIP, DJ, REMIX, and ECHO. Portraits, full-body characters, and the empty lift are separate local WebP assets. The selected ID is validated and stored independently under `slangillion:character:v1`; new or invalid preferences default to COURIER. No account or runtime image-generation service is involved.
+
+The welcome action becomes **RESUME DAILY** for an unfinished saved challenge or **VIEW RESULTS** after completion. Existing absolute deadlines continue on the welcome screen and inside the character dialog; selecting a character never starts a new round or modifies daily progress. During gameplay, use the small avatar in the header to change characters. The selected character appears in gameplay, reveals, and results.
+
+[Implementation notes, asset provenance, changed files, and screenshots](docs/character-selection.md).

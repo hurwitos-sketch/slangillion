@@ -56,6 +56,7 @@ for (const row of categories)
       state,
     );
     await page.goto("/");
+    await page.getByRole("button", { name: "RESUME DAILY" }).click();
     await expect(page.getByLabel("Your slang expression")).toBeVisible();
     const before = await page.evaluate(
       (date) => localStorage.getItem(`slangillion:v1:${date}`),
@@ -128,6 +129,7 @@ test("invalid retries cannot extend the original countdown", async ({
     state,
   );
   await page.goto("/");
+  await page.getByRole("button", { name: "RESUME DAILY" }).click();
   await page.getByLabel("Your slang expression").fill("silly");
   await page.getByLabel("Your slang expression").press("Enter");
   await expect(page.getByRole("main").getByRole("alert")).toBeVisible();

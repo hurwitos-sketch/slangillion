@@ -29,6 +29,9 @@ test("complete daily game, resume, all reveals and clipboard fallback", async ({
         date,
       );
       await page.reload();
+      await page
+        .getByRole("button", { name: /RESUME DAILY|VIEW RESULTS/ })
+        .click();
       await expect(page.getByLabel("Your slang expression")).toBeVisible();
       expect(
         await page.evaluate(
@@ -77,6 +80,7 @@ test("complete daily game, resume, all reveals and clipboard fallback", async ({
   await expect(page.locator(".final-score")).toContainText("280");
   await expect(page.locator(".result-list>div")).toHaveCount(7);
   await page.reload();
+  await page.getByRole("button", { name: /RESUME DAILY|VIEW RESULTS/ }).click();
   await expect(page.locator(".final-score")).toContainText("280");
   await expect(page.getByRole("button", { name: "Play Daily" })).toHaveCount(0);
   await page.evaluate(() =>
@@ -107,6 +111,7 @@ test("expired round after refresh scores zero; midnight unlocks next daily", asy
   await expect(page.locator(".points")).toContainText("+0");
   await expect(page.getByText("TIME’S UP", { exact: true })).toBeVisible();
   await page.reload();
+  await page.getByRole("button", { name: /RESUME DAILY|VIEW RESULTS/ }).click();
   await expect(page.locator(".points")).toContainText("+0");
   await page.clock.fastForward(5000);
   await expect(page.getByRole("button", { name: "Play Daily" })).toBeVisible();
@@ -121,6 +126,7 @@ test("expired saved active round restores to zero", async ({ page }) => {
     localStorage.setItem(key, JSON.stringify(state));
   });
   await page.reload();
+  await page.getByRole("button", { name: /RESUME DAILY|VIEW RESULTS/ }).click();
   await expect(page.locator(".points")).toContainText("+0");
   await expect(page.getByText("TIME’S UP", { exact: true })).toBeVisible();
 });
@@ -149,6 +155,7 @@ test("native sharing and manual copy fallback", async ({ page }) => {
     state,
   );
   await page.reload();
+  await page.getByRole("button", { name: /RESUME DAILY|VIEW RESULTS/ }).click();
   await page.evaluate(() =>
     Object.defineProperty(navigator, "share", {
       configurable: true,
@@ -230,6 +237,7 @@ test("failed native share falls back to clipboard; cancellation is quiet", async
     state,
   );
   await page.reload();
+  await page.getByRole("button", { name: /RESUME DAILY|VIEW RESULTS/ }).click();
   await page.evaluate(() =>
     Object.defineProperty(navigator, "share", {
       configurable: true,
@@ -284,6 +292,7 @@ test("multiple tabs share locked answers without duplicating points", async ({
   const other = await context.newPage();
   await other.goto("/");
   await page.getByRole("button", { name: "Play Daily" }).click();
+  await other.getByRole("button", { name: "RESUME DAILY" }).click();
   await expect(other.getByLabel("Your slang expression")).toBeVisible();
   const date = await page.evaluate(() => new Date().toISOString().slice(0, 10));
   await page
@@ -373,6 +382,7 @@ test("midnight restores an already-started new daily instead of restarting it", 
     state,
   );
   await page.clock.fastForward(1500);
+  await page.getByRole("button", { name: "RESUME DAILY" }).click();
   await expect(page.locator(".game-top")).toContainText("ROUND 2 OF 7");
   await expect(page.getByRole("button", { name: "Play Daily" })).toHaveCount(0);
 });
