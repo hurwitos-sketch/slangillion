@@ -32,3 +32,5 @@ Mobile checks use Chromium emulation and a reduced viewport to approximate keybo
 ## Validation
 
 On 2026-11-09, ESLint, strict TypeScript, the production Next.js build, and all 34 logic tests passed. All 104 desktop/mobile Chromium browser tests passed against that build, including the new station checks and existing character, recognition/autocorrect, timer, storage, rollover, scoring, sharing, and descent coverage. Formatting-only changes followed the build; lint and TypeScript were rerun successfully.
+
+Typography follow-up: the UI now shares the Arial/Helvetica sans-serif family used by the FRIEND prompt, replacing monospace labels and alternate display families. Labels, timer digits, and hints use a consistent bold weight; the prompt retains its existing lettering. Updated screenshots were checked. Lint, TypeScript, production build, and eight targeted desktop/mobile layout and station browser tests passed.
