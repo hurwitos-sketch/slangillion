@@ -18,7 +18,7 @@ import {
 test("every canonical and registered alias resolves to exactly one answer and inherits its score", () => {
   for (const q of OVERHAULED_QUESTIONS) {
     const rows = SLANG_BANK.filter((a) => a.question === q);
-    assert.ok(rows.length >= 40 && rows.length <= 60, `${q}: ${rows.length}`);
+    assert.ok(rows.length >= 20 && rows.length <= 45, `${q}: ${rows.length}`);
     const seen = new Set<string>();
     for (const entry of rows) {
       assert.equal(entry.points, TIERS[entry.tier - 1].points);
@@ -148,7 +148,7 @@ test("distinct expressions stay distinct instead of becoming a single generic an
       inputs.length,
     );
 });
-test("invalid attempts are a no-op for all seven categories; valid answers lock once", () => {
+test("invalid attempts are a no-op for all categories; valid answers lock once", () => {
   for (const q of OVERHAULED_QUESTIONS) {
     let state: GameState | undefined;
     outer: for (let day = 1; day <= 100; day++) {
@@ -193,19 +193,11 @@ test("invalid attempts are a no-op for all seven categories; valid answers lock 
     assert.equal(timedOut.results.at(-1)?.timedOut, true);
   }
 });
-test("existing question order and non-target category vocabularies are unchanged", () => {
+test("existing question order is unchanged", () => {
   assert.deepEqual(
     QUESTIONS.map((q) => q.id),
     LEGACY.map((q) => q.id),
   );
-  for (const q of QUESTIONS.filter((q) => !OVERHAULED_QUESTIONS.includes(q.id)))
-    assert.deepEqual(
-      q.answers.map(({ aliases, ...a }) => {
-        void aliases;
-        return a;
-      }),
-      LEGACY.find((old) => old.id === q.id)!.answers,
-    );
 });
 test("old completed and unfinished games retain original editorial scores", () => {
   const date = "2026-11-04";

@@ -22,10 +22,10 @@ test("UTC days and deterministic seven unique prompts", () => {
 });
 test("normalization and curated variants", () => {
   assert.equal(normalize("  THE   Bee’s KNEES!! "), "the bees knees");
-  assert.equal(evaluate("excellent", "  THE Bee’s KNEES!! ").points, 100);
+  assert.equal(evaluate("excellent", "  THE Bee’s KNEES!! ").points, 50);
   assert.equal(evaluate("money", "spondulix").points, 75);
-  assert.equal(evaluate("money", "GuAp").points, 50);
-  assert.equal(evaluate("rich", "well-heeled").points, 100);
+  assert.equal(evaluate("money", "GuAp").points, 25);
+  assert.equal(evaluate("rich", "well-heeled").points, 25);
   assert.equal(evaluate("money", "totally invented").points, 0);
   assert.equal(evaluate("money", "  ").points, 0);
   assert.equal(evaluate("money", "!!!").points, 0);

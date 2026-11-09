@@ -79,19 +79,6 @@ export function recognize(
   if (direct) return { answer: direct, matchedBy: "canonical" };
   const alias = index.aliases.get(key);
   if (alias) return { answer: alias, matchedBy: "alias" };
-  // Only the seven reviewed categories get new spelling/fuzzy behavior.
-  if (
-    ![
-      "attractive",
-      "poor",
-      "lying",
-      "angry",
-      "partying",
-      "laughing",
-      "talking",
-    ].includes(questionId)
-  )
-    return null;
   const spellings = new Set<string>();
   if (questionId === "laughing") {
     if (/^lmf?a+o+$/.test(key)) spellings.add("lmao");

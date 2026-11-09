@@ -1,6 +1,7 @@
 import { QUESTIONS, type Tier } from "./data";
 import { QUESTIONS as LEGACY_QUESTIONS } from "./legacy-data";
 import { recognize } from "./recognition";
+import { recognize as recognizeV2 } from "./recognition-v2";
 export { normalize } from "./recognition";
 export const ROUND_MS = 25_000;
 export type Result = {
@@ -10,7 +11,7 @@ export type Result = {
   tier: Tier | null;
   points: number;
   timedOut: boolean;
-  recognitionVersion?: 2;
+  recognitionVersion?: 2 | 3;
 };
 export type GameState = {
   version: 1 | 2;
@@ -50,6 +51,22 @@ export function evaluate(
   return {
     questionId,
     answer: input.trim().slice(0, 80),
+    canonical: a?.canonical ?? null,
+    tier: a?.tier ?? null,
+    points: a?.points ?? 0,
+    timedOut,
+    recognitionVersion: 3,
+  };
+}
+function evaluateV2(
+  questionId: string,
+  input: string,
+  timedOut: boolean,
+): Result {
+  const a = timedOut ? undefined : recognizeV2(questionId, input)?.answer;
+  return {
+    questionId,
+    answer: input,
     canonical: a?.canonical ?? null,
     tier: a?.tier ?? null,
     points: a?.points ?? 0,
@@ -148,13 +165,19 @@ export function restore(raw: string | null, date: string): GameState | null {
         r.questionId !== questions[i].id
       )
         return null;
-      if (r.recognitionVersion !== undefined && r.recognitionVersion !== 2)
+      if (
+        r.recognitionVersion !== undefined &&
+        r.recognitionVersion !== 2 &&
+        r.recognitionVersion !== 3
+      )
         return null;
       const checked =
-        r.recognitionVersion === 2
+        r.recognitionVersion === 3
           ? evaluate(r.questionId, r.answer, r.timedOut)
-          : evaluateLegacy(r.questionId, r.answer, r.timedOut);
-      if (r.recognitionVersion === 2 && !r.timedOut && !checked.tier)
+          : r.recognitionVersion === 2
+            ? evaluateV2(r.questionId, r.answer, r.timedOut)
+            : evaluateLegacy(r.questionId, r.answer, r.timedOut);
+      if (r.recognitionVersion !== undefined && !r.timedOut && !checked.tier)
         return null;
       if (
         checked.points !== r.points ||
