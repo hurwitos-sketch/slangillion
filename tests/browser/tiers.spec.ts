@@ -8,7 +8,7 @@ import {
   type Result,
 } from "../../lib/game";
 import { QUESTIONS as V3_QUESTIONS } from "../../lib/data-v3";
-test("results have four levels with requested points and no Caves", async ({
+test("results have four destinations with requested points and no scored city", async ({
   page,
 }) => {
   const date = new Date().toISOString().slice(0, 10);
@@ -34,7 +34,8 @@ test("results have four levels with requested points and no Caves", async ({
   await page.getByRole("button", { name: "VIEW RESULTS" }).click();
   await expect(page.locator(".distribution>div")).toHaveCount(4);
   await expect(page.locator(".final-score")).toContainText("410");
-  await expect(page.getByText("Caves", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("Street Level", { exact: true })).toHaveCount(0);
+  await expect(page.locator(".distribution")).toContainText("Caves");
   await expect(page.locator(".distribution")).toContainText("Trenches");
 });
 test("old five-tier saved games render safely with original total and four visible levels", async ({

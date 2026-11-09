@@ -16,7 +16,7 @@ import {
   utcDate,
   type GameState,
 } from "@/lib/game";
-import Environment from "./Environment";
+import Descent from "./descent/Descent";
 import Arrow from "./Arrow";
 import { readProgress, storageKey } from "@/lib/storage";
 import { shareResults } from "@/lib/share";
@@ -32,6 +32,7 @@ import {
   type CharacterId,
 } from "@/lib/characters";
 import Image from "next/image";
+import { WORLD_ASSETS, spriteAsset } from "@/lib/descent";
 export default function Game() {
   const [ready, setReady] = useState(false),
     [date, setDate] = useState(""),
@@ -45,11 +46,14 @@ export default function Game() {
     [selectedCharacter, setSelectedCharacter] =
       useState<CharacterId>(DEFAULT_CHARACTER),
     [welcomeOpen, setWelcomeOpen] = useState(true),
-    [selectorOpen, setSelectorOpen] = useState(false);
+    [selectorOpen, setSelectorOpen] = useState(false),
+    [descentRound, setDescentRound] = useState<string | null>(null),
+    [descentDone, setDescentDone] = useState(true);
   const stateRef = useRef<GameState | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const dateRef = useRef("");
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const nextButtonRef = useRef<HTMLButtonElement>(null);
   function save(next: GameState) {
     setAnswerError("");
     stateRef.current = next;
@@ -143,6 +147,22 @@ export default function Game() {
     if (game?.phase === "answer") inputRef.current?.focus();
     else if (game?.phase) headingRef.current?.focus();
   }, [game?.index, game?.phase, welcomeOpen, selectorOpen]);
+  useEffect(() => {
+    if (!ready || welcomeOpen || game?.phase !== "answer") return;
+    const images = [...WORLD_ASSETS, spriteAsset(selectedCharacter)].map(
+      (src) => {
+        const image = new window.Image();
+        image.src = src;
+        return image;
+      },
+    );
+    return () => {
+      for (const image of images) {
+        image.onload = null;
+        image.onerror = null;
+      }
+    };
+  }, [ready, welcomeOpen, game?.phase, selectedCharacter]);
   // Read storage before acting: another tab may have locked or advanced a round
   // while this tab was suspended and its storage event was still queued.
   function syncCurrent() {
@@ -202,9 +222,18 @@ export default function Game() {
       return;
     }
     save(nextState);
+    if (nextState.results.at(-1)?.tier && !nextState.results.at(-1)?.timedOut) {
+      setDescentRound(`${nextState.date}:${nextState.index}`);
+      setDescentDone(false);
+    }
     setReported(false);
   }
   function next() {
+    if (
+      !descentDone &&
+      descentRound === `${stateRef.current?.date}:${stateRef.current?.index}`
+    )
+      return;
     const previous = stateRef.current;
     const state = syncCurrent();
     if (
@@ -215,6 +244,8 @@ export default function Game() {
     )
       return;
     save(advance(state));
+    setDescentRound(null);
+    setDescentDone(true);
     setAnswer("");
     setNotice("");
     setReported(false);
@@ -433,14 +464,20 @@ export default function Game() {
               </strong>
             </div>
             <Progress index={game.index} />
-            <div className="reveal-environment">
-              <Environment tier={tier || 1} />
-              <CharacterArt
-                id={selectedCharacter}
-                className="reveal-character"
+            {tier && result && !result.timedOut && (
+              <Descent
+                key={`${game.date}:${game.index}`}
+                tier={tier}
+                character={selectedCharacter}
+                animate={descentRound === `${game.date}:${game.index}`}
+                onComplete={(focusNext) => {
+                  setDescentDone(true);
+                  if (focusNext)
+                    requestAnimationFrame(() => nextButtonRef.current?.focus());
+                }}
               />
-            </div>
-            <div className="reveal-copy" aria-live="polite">
+            )}
+            <div className="reveal-copy" aria-live="polite" aria-atomic="true">
               <div className="eyebrow">
                 {result?.timedOut
                   ? "TIME’S UP"
@@ -467,10 +504,14 @@ export default function Game() {
                 </p>
               )}
             </div>
-            <button className="primary" onClick={next}>
-              {game.index === 6 ? "See my results" : "Next round"}{" "}
-              <span>→</span>
-            </button>
+            {(descentDone ||
+              !tier ||
+              descentRound !== `${game.date}:${game.index}`) && (
+              <button ref={nextButtonRef} className="primary" onClick={next}>
+                {game.index === 6 ? "See my results" : "Next round"}{" "}
+                <span>→</span>
+              </button>
+            )}
             {!tier && !result?.timedOut && (
               <button
                 className="text-button"

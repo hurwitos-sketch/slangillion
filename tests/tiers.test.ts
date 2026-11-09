@@ -11,12 +11,12 @@ import {
   type Result,
 } from "../lib/game";
 import { recognize as recognizeV3 } from "../lib/recognition-v3";
-test("exactly four live tiers with requested values and no Caves", () => {
+test("exactly four destinations with requested values and no scored city", () => {
   assert.deepEqual(
     TIERS.map((t) => [t.name, t.points]),
     [
-      ["Street Level", 20],
-      ["Subway", 50],
+      ["Subway", 20],
+      ["Caves", 50],
       ["Trenches", 85],
       ["The Underground", 100],
     ],

@@ -43,7 +43,7 @@ Public GitHub repository search and raw files were accessible. An inspected smal
 
 ## Scoring and recognition
 
-The four live levels are Street Level (20), Subway (50), Trenches (85), and The Underground (100). Caves is removed. Exactly one canonical expression per category earns The Underground, including that expression’s accepted aliases. Scores are editorial estimates, never measured frequencies or random assignments. Regional origin alone does not make an answer high-tier. Each category retains accepted answers at every tier; the maximum daily score remains 700.
+The four live levels are Subway (20), Caves (50), Trenches (85), and The Underground (100). The city is the unscored starting point. Exactly one canonical expression per category earns The Underground, including that expression’s accepted aliases. Scores are editorial estimates, never measured frequencies or random assignments. Regional origin alone does not make an answer high-tier. Each category retains accepted answers at every tier; the maximum daily score remains 700.
 
 Recognition is question-specific: normalized canonical match, explicit alias, safe repeated-letter variation, then conservative unambiguous typo matching. Negation and word boundaries are preserved. Removed plain synonyms do not become accepted merely through their old aliases.
 
@@ -55,7 +55,7 @@ Recognition version 1/unmarked rounds retain their original bank. Version 2 roun
 
 ### Money
 
-#### Street Level — 20 points
+#### Subway — 20 points
 
 | Canonical | Aliases | Meaning / review note | Source status |
 |---|---|---|---|
@@ -67,7 +67,7 @@ Recognition version 1/unmarked rounds retain their original bank. Version 2 roun
 | racks | rack | Slang, figurative idiom or familiar address associated with money; editorial sense selection with independent dictionary review pending. | Pending web review |
 | bag | a bag | Slang, figurative idiom or familiar address associated with money; editorial sense selection with independent dictionary review pending. | Pending web review |
 
-#### Subway — 50 points
+#### Caves — 50 points
 
 | Canonical | Aliases | Meaning / review note | Source status |
 |---|---|---|---|
@@ -112,7 +112,7 @@ Recognition version 1/unmarked rounds retain their original bank. Version 2 roun
 
 ### Friend
 
-#### Street Level — 20 points
+#### Subway — 20 points
 
 | Canonical | Aliases | Meaning / review note | Source status |
 |---|---|---|---|
@@ -126,7 +126,7 @@ Recognition version 1/unmarked rounds retain their original bank. Version 2 roun
 | my guy | guy | Friendly form of address; includes the user-requested guy in that intended sense. | Pending web review |
 | fella | fellas | Friendly informal address; retained by explicit user request rather than as proof of friendship. | Pending web review |
 
-#### Subway — 50 points
+#### Caves — 50 points
 
 | Canonical | Aliases | Meaning / review note | Source status |
 |---|---|---|---|
@@ -167,7 +167,7 @@ Recognition version 1/unmarked rounds retain their original bank. Version 2 roun
 
 ### Attractive
 
-#### Street Level — 20 points
+#### Subway — 20 points
 
 | Canonical | Aliases | Meaning / review note | Source status |
 |---|---|---|---|
@@ -180,7 +180,7 @@ Recognition version 1/unmarked rounds retain their original bank. Version 2 roun
 | babe | — | Slang, figurative idiom or familiar address associated with attractive; editorial sense selection with independent dictionary review pending. | Pending web review |
 | fit | — | Slang, figurative idiom or familiar address associated with attractive; editorial sense selection with independent dictionary review pending. | Pending web review |
 
-#### Subway — 50 points
+#### Caves — 50 points
 
 | Canonical | Aliases | Meaning / review note | Source status |
 |---|---|---|---|
@@ -226,7 +226,7 @@ Recognition version 1/unmarked rounds retain their original bank. Version 2 roun
 
 ### Leaving
 
-#### Street Level — 20 points
+#### Subway — 20 points
 
 | Canonical | Aliases | Meaning / review note | Source status |
 |---|---|---|---|
@@ -238,7 +238,7 @@ Recognition version 1/unmarked rounds retain their original bank. Version 2 roun
 | jet | jetting | Slang, figurative idiom or familiar address associated with leaving; editorial sense selection with independent dictionary review pending. | Pending web review |
 | split | splitting | Slang, figurative idiom or familiar address associated with leaving; editorial sense selection with independent dictionary review pending. | Pending web review |
 
-#### Subway — 50 points
+#### Caves — 50 points
 
 | Canonical | Aliases | Meaning / review note | Source status |
 |---|---|---|---|
@@ -285,7 +285,7 @@ Recognition version 1/unmarked rounds retain their original bank. Version 2 roun
 
 ### Lying
 
-#### Street Level — 20 points
+#### Subway — 20 points
 
 | Canonical | Aliases | Meaning / review note | Source status |
 |---|---|---|---|
@@ -296,7 +296,7 @@ Recognition version 1/unmarked rounds retain their original bank. Version 2 roun
 | bluffing | bluffin; bluff | Slang, figurative idiom or familiar address associated with lying; editorial sense selection with independent dictionary review pending. | Pending web review |
 | telling porkies | porkies; pork pies | Slang, figurative idiom or familiar address associated with lying; editorial sense selection with independent dictionary review pending. | Pending web review |
 
-#### Subway — 50 points
+#### Caves — 50 points
 
 | Canonical | Aliases | Meaning / review note | Source status |
 |---|---|---|---|
@@ -342,7 +342,7 @@ Recognition version 1/unmarked rounds retain their original bank. Version 2 roun
 
 ### Excellent
 
-#### Street Level — 20 points
+#### Subway — 20 points
 
 | Canonical | Aliases | Meaning / review note | Source status |
 |---|---|---|---|
@@ -354,7 +354,7 @@ Recognition version 1/unmarked rounds retain their original bank. Version 2 roun
 | slaps | slap | Slang, figurative idiom or familiar address associated with excellent; editorial sense selection with independent dictionary review pending. | Pending web review |
 | bussin | bussing | Slang, figurative idiom or familiar address associated with excellent; editorial sense selection with independent dictionary review pending. | Pending web review |
 
-#### Subway — 50 points
+#### Caves — 50 points
 
 | Canonical | Aliases | Meaning / review note | Source status |
 |---|---|---|---|
@@ -397,7 +397,7 @@ Recognition version 1/unmarked rounds retain their original bank. Version 2 roun
 
 ### Angry
 
-#### Street Level — 20 points
+#### Subway — 20 points
 
 | Canonical | Aliases | Meaning / review note | Source status |
 |---|---|---|---|
@@ -409,7 +409,7 @@ Recognition version 1/unmarked rounds retain their original bank. Version 2 roun
 | vexed | vex; vexed up | Slang, figurative idiom or familiar address associated with angry; editorial sense selection with independent dictionary review pending. | Pending web review |
 | big mad | — | Slang, figurative idiom or familiar address associated with angry; editorial sense selection with independent dictionary review pending. | Pending web review |
 
-#### Subway — 50 points
+#### Caves — 50 points
 
 | Canonical | Aliases | Meaning / review note | Source status |
 |---|---|---|---|
@@ -457,7 +457,7 @@ Recognition version 1/unmarked rounds retain their original bank. Version 2 roun
 
 ### Tired
 
-#### Street Level — 20 points
+#### Subway — 20 points
 
 | Canonical | Aliases | Meaning / review note | Source status |
 |---|---|---|---|
@@ -469,7 +469,7 @@ Recognition version 1/unmarked rounds retain their original bank. Version 2 roun
 | done | im done | Slang, figurative idiom or familiar address associated with tired; editorial sense selection with independent dictionary review pending. | Pending web review |
 | burnt out | burned out | Slang, figurative idiom or familiar address associated with tired; editorial sense selection with independent dictionary review pending. | Pending web review |
 
-#### Subway — 50 points
+#### Caves — 50 points
 
 | Canonical | Aliases | Meaning / review note | Source status |
 |---|---|---|---|
@@ -509,7 +509,7 @@ Recognition version 1/unmarked rounds retain their original bank. Version 2 roun
 
 ### Rich
 
-#### Street Level — 20 points
+#### Subway — 20 points
 
 | Canonical | Aliases | Meaning / review note | Source status |
 |---|---|---|---|
@@ -521,7 +521,7 @@ Recognition version 1/unmarked rounds retain their original bank. Version 2 roun
 | made of money | — | Slang, figurative idiom or familiar address associated with rich; editorial sense selection with independent dictionary review pending. | Pending web review |
 | stinking rich | — | Slang, figurative idiom or familiar address associated with rich; editorial sense selection with independent dictionary review pending. | Pending web review |
 
-#### Subway — 50 points
+#### Caves — 50 points
 
 | Canonical | Aliases | Meaning / review note | Source status |
 |---|---|---|---|
@@ -564,7 +564,7 @@ Recognition version 1/unmarked rounds retain their original bank. Version 2 roun
 
 ### Poor
 
-#### Street Level — 20 points
+#### Subway — 20 points
 
 | Canonical | Aliases | Meaning / review note | Source status |
 |---|---|---|---|
@@ -576,7 +576,7 @@ Recognition version 1/unmarked rounds retain their original bank. Version 2 roun
 | tapped out | tapped | Slang, figurative idiom or familiar address associated with poor; editorial sense selection with independent dictionary review pending. | Pending web review |
 | cleaned out | — | Slang, figurative idiom or familiar address associated with poor; editorial sense selection with independent dictionary review pending. | Pending web review |
 
-#### Subway — 50 points
+#### Caves — 50 points
 
 | Canonical | Aliases | Meaning / review note | Source status |
 |---|---|---|---|
@@ -623,7 +623,7 @@ Recognition version 1/unmarked rounds retain their original bank. Version 2 roun
 
 ### Partying
 
-#### Street Level — 20 points
+#### Subway — 20 points
 
 | Canonical | Aliases | Meaning / review note | Source status |
 |---|---|---|---|
@@ -634,7 +634,7 @@ Recognition version 1/unmarked rounds retain their original bank. Version 2 roun
 | raving | rave; raver; rave mode; raving it up | Slang, figurative idiom or familiar address associated with partying; editorial sense selection with independent dictionary review pending. | Pending web review |
 | boogie | boogying; boogieing; boogie down | Slang, figurative idiom or familiar address associated with partying; editorial sense selection with independent dictionary review pending. | Pending web review |
 
-#### Subway — 50 points
+#### Caves — 50 points
 
 | Canonical | Aliases | Meaning / review note | Source status |
 |---|---|---|---|
@@ -683,7 +683,7 @@ Recognition version 1/unmarked rounds retain their original bank. Version 2 roun
 
 ### Laughing
 
-#### Street Level — 20 points
+#### Subway — 20 points
 
 | Canonical | Aliases | Meaning / review note | Source status |
 |---|---|---|---|
@@ -694,7 +694,7 @@ Recognition version 1/unmarked rounds retain their original bank. Version 2 roun
 | teehee | tee hee | Slang, figurative idiom or familiar address associated with laughing; editorial sense selection with independent dictionary review pending. | Pending web review |
 | bahaha | bwahaha; muahaha | Slang, figurative idiom or familiar address associated with laughing; editorial sense selection with independent dictionary review pending. | Pending web review |
 
-#### Subway — 50 points
+#### Caves — 50 points
 
 | Canonical | Aliases | Meaning / review note | Source status |
 |---|---|---|---|
@@ -742,7 +742,7 @@ Recognition version 1/unmarked rounds retain their original bank. Version 2 roun
 
 ### Talking
 
-#### Street Level — 20 points
+#### Subway — 20 points
 
 | Canonical | Aliases | Meaning / review note | Source status |
 |---|---|---|---|
@@ -753,7 +753,7 @@ Recognition version 1/unmarked rounds retain their original bank. Version 2 roun
 | chinwag | chinwagging; having a chinwag; chinning | Slang, figurative idiom or familiar address associated with talking; editorial sense selection with independent dictionary review pending. | Pending web review |
 | natter | nattering; having a natter | Slang, figurative idiom or familiar address associated with talking; editorial sense selection with independent dictionary review pending. | Pending web review |
 
-#### Subway — 50 points
+#### Caves — 50 points
 
 | Canonical | Aliases | Meaning / review note | Source status |
 |---|---|---|---|
@@ -801,7 +801,7 @@ Recognition version 1/unmarked rounds retain their original bank. Version 2 roun
 
 ### Showing off
 
-#### Street Level — 20 points
+#### Subway — 20 points
 
 | Canonical | Aliases | Meaning / review note | Source status |
 |---|---|---|---|
@@ -810,7 +810,7 @@ Recognition version 1/unmarked rounds retain their original bank. Version 2 roun
 | peacock | peacocking | Slang, figurative idiom or familiar address associated with showing off; editorial sense selection with independent dictionary review pending. | Pending web review |
 | stunt | stunting; stuntin | Slang, figurative idiom or familiar address associated with showing off; editorial sense selection with independent dictionary review pending. | Pending web review |
 
-#### Subway — 50 points
+#### Caves — 50 points
 
 | Canonical | Aliases | Meaning / review note | Source status |
 |---|---|---|---|
@@ -850,7 +850,7 @@ Recognition version 1/unmarked rounds retain their original bank. Version 2 roun
 
 ### Embarrassing
 
-#### Street Level — 20 points
+#### Subway — 20 points
 
 | Canonical | Aliases | Meaning / review note | Source status |
 |---|---|---|---|
@@ -863,7 +863,7 @@ Recognition version 1/unmarked rounds retain their original bank. Version 2 roun
 | corny | — | Slang, figurative idiom or familiar address associated with embarrassing; editorial sense selection with independent dictionary review pending. | Pending web review |
 | cheesy | — | Slang, figurative idiom or familiar address associated with embarrassing; editorial sense selection with independent dictionary review pending. | Pending web review |
 
-#### Subway — 50 points
+#### Caves — 50 points
 
 | Canonical | Aliases | Meaning / review note | Source status |
 |---|---|---|---|

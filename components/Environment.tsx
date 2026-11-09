@@ -33,30 +33,6 @@ export default function Environment({
         {tier === 1 ? (
           <>
             <path
-              d="M0 250V90H70V140H110V55H185V115H230V30H300V120H350V70H420V130H480V45H570V110H640V330H0Z"
-              fill="#20202c"
-            />
-            {Array.from({ length: 18 }, (_, i) => (
-              <rect
-                key={i}
-                x={i * 36 + 10}
-                y={100 + (i % 3) * 30}
-                width="9"
-                height="13"
-                fill="currentColor"
-                opacity=".5"
-              />
-            ))}
-            <path
-              d="M90 280V155Q90 130 120 130M510 280V155Q510 130 540 130"
-              stroke="currentColor"
-              fill="none"
-              strokeWidth="4"
-            />
-          </>
-        ) : tier === 2 ? (
-          <>
-            <path
               d="M40 280V120Q320 -55 600 120V280M100 280V145Q320 5 540 145V280"
               stroke="#363044"
               strokeWidth="20"
@@ -85,7 +61,7 @@ export default function Environment({
             ))}
             <path d="M0 285H640M0 300H640" stroke="currentColor" opacity=".5" />
           </>
-        ) : tier === 3 ? (
+        ) : tier === 2 || tier === 3 ? (
           <>
             <path
               d="M0 0H640V330L565 210 530 270 480 115 420 70 360 120 310 40 250 140 180 100 110 230 50 190 0 330Z"
@@ -97,14 +73,15 @@ export default function Environment({
               stroke="currentColor"
               strokeOpacity=".4"
             />
-            {[140, 310, 450].map((x, i) => (
-              <path
-                key={x}
-                d={`M${x} 270l15 -${55 + i * 16} 15 ${55 + i * 16}Z`}
-                fill="currentColor"
-                opacity=".6"
-              />
-            ))}
+            {tier === 3 &&
+              [140, 310, 450].map((x, i) => (
+                <path
+                  key={x}
+                  d={`M${x} 270l15 -${55 + i * 16} 15 ${55 + i * 16}Z`}
+                  fill="currentColor"
+                  opacity=".6"
+                />
+              ))}
           </>
         ) : (
           <>

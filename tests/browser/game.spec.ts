@@ -325,6 +325,7 @@ test("keyboard focus follows reveals, next round, and results", async ({
     .fill(dailyQuestions(date)[0].answers[0].canonical);
   await page.getByLabel("Your slang expression").press("Enter");
   await expect(page.locator(".reveal h1")).toBeFocused();
+  await expect(page.getByRole("button", { name: "Next round" })).toBeVisible();
   await page.keyboard.press("Tab");
   await expect(page.getByRole("button", { name: "Next round" })).toBeFocused();
   await page.keyboard.press("Enter");

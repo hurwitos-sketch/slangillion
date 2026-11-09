@@ -1,0 +1,39 @@
+{
+  "columns": 4,
+  "rows": 3,
+  "cellSize": 192,
+  "frames": [
+    "idle",
+    "walk-a",
+    "walk-b",
+    "dig-raised",
+    "dig-ground",
+    "break",
+    "fall",
+    "land",
+    "portal",
+    "arrive",
+    "walk-pass",
+    "dig-mid"
+  ],
+  "sources": {
+    "courier": "exec-34f9fb0d-b929-41f2-bf6d-176ef544be29.png",
+    "mc": "exec-fadd47a8-0e8a-48cc-bb70-0a28f81766bd.png",
+    "pathfinder": "exec-c0d145d5-57b6-4371-928a-d2228f372bdb.png",
+    "tag": "exec-695b7001-fdba-4c37-b2a2-206d22d46f29.png",
+    "kickflip": "exec-4698d722-76d5-44ff-a288-4939c9b19f51.png",
+    "dj": "exec-77bcba46-0391-4bf0-b394-ebf60b7dd388.png",
+    "remix": "exec-a075dfec-2c73-4416-b984-cb203ffb17ad.png",
+    "echo": "exec-17a6e675-63ac-42d7-bfe0-8c7d74a89212.png"
+  },
+  "alphaVerified": [
+    "courier",
+    "mc",
+    "pathfinder",
+    "tag",
+    "kickflip",
+    "dj",
+    "remix",
+    "echo"
+  ]
+}

@@ -141,10 +141,9 @@ test("character changes preserve draft, index, results, points, and original dea
     .getByLabel("Your slang expression")
     .fill(dailyQuestions(date)[0].answers[0].canonical);
   await page.getByLabel("Your slang expression").press("Enter");
-  await expect(page.locator(".reveal-character")).toHaveAttribute(
-    "alt",
-    "DJ character",
-  );
+  await expect(
+    page.locator('.descent-stage[data-status="arrived"]'),
+  ).toHaveAttribute("data-character", "dj");
   const reveal = await page.evaluate(
     (date) => localStorage.getItem(`slangillion:v1:${date}`),
     date,
@@ -158,10 +157,9 @@ test("character changes preserve draft, index, results, points, and original dea
       date,
     ),
   ).toBe(reveal);
-  await expect(page.locator(".reveal-character")).toHaveAttribute(
-    "alt",
-    "TAG character",
-  );
+  await expect(
+    page.locator('.descent-stage[data-status="arrived"]'),
+  ).toHaveAttribute("data-character", "tag");
 });
 test("timer expires while selector is open and selection cannot restart the round", async ({
   page,
@@ -176,10 +174,7 @@ test("timer expires while selector is open and selection cannot restart the roun
   await page.getByRole("button", { name: "Done", exact: false }).click();
   await expect(page.getByText("TIME’S UP", { exact: true })).toBeVisible();
   await expect(page.locator(".points")).toContainText("+0");
-  await expect(page.locator(".reveal-character")).toHaveAttribute(
-    "alt",
-    "REMIX character",
-  );
+  await expect(page.locator(".descent-stage")).toHaveCount(0);
 });
 test("welcome resumes original deadline and completed games only offer results", async ({
   page,

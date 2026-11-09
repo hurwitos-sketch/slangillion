@@ -95,13 +95,15 @@ function evaluateV3(
 export function resultTier(result: Result | undefined): Tier | null {
   if (!result?.tier) return null;
   if (result.recognitionVersion === 4) return result.tier as Tier;
-  return result.tier === 5
-    ? 4
-    : result.tier === 4
-      ? 3
-      : result.tier === 3
-        ? 2
-        : result.tier;
+  return result.tier <= 2
+    ? 1
+    : result.tier === 5
+      ? 4
+      : result.tier === 4
+        ? 3
+        : result.tier === 3
+          ? 2
+          : result.tier;
 }
 export function tierInfo(result: Result) {
   const tier = resultTier(result);
@@ -247,7 +249,7 @@ export function reconcileProgress(
   return JSON.stringify(local) === JSON.stringify(stored) ? local : stored;
 }
 export function shareText(s: GameState, url: string) {
-  const icons = ["🩶", "🩵", "🧡", "❤️"];
+  const icons = ["🩵", "💜", "🧡", "❤️"];
   return `SLANGILLION #${String(challengeNumber(s.date)).padStart(3, "0")}\nHow deep is your slang?\nScore: ${total(s)}/700\n${s.results
     .map((r) => {
       const tier = resultTier(r);

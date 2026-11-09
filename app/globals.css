@@ -658,10 +658,10 @@ footer i {
   border: 1px solid #695075;
 }
 .env-1 {
-  color: #a8a9b5;
+  color: #54c9ff;
 }
 .env-2 {
-  color: #54c9ff;
+  color: #9cabb7;
 }
 .env-3 {
   color: #ff9a50;
@@ -1671,6 +1671,141 @@ html:has(.character-dialog[open]) {
 }
 @media (prefers-reduced-motion: reduce) {
   .game-entry .game-companion .character-art {
+    animation: none !important;
+  }
+}
+
+/* One-shot presentation timeline. Game state and controls stay outside the camera. */
+.descent-wrap {
+  margin-bottom: 18px;
+}
+.descent-stage {
+  position: relative;
+  aspect-ratio: 8/5;
+  overflow: hidden;
+  border: 1px solid #604169;
+  border-radius: 10px;
+  background: #120d1a;
+  contain: layout paint;
+  isolation: isolate;
+}
+.descent-world {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.descent-depth {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 22px 13px 11px;
+  color: #e0d0e8;
+  font: 9px monospace;
+  letter-spacing: 1.2px;
+  background: linear-gradient(transparent, #100819dd);
+  pointer-events: none;
+}
+.descent-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 1px 0;
+}
+.descent-controls > span {
+  color: #a899b2;
+  font: 10px monospace;
+}
+.skip-animation {
+  background: #281a34;
+  border: 1px solid #785088;
+  color: #e9c8ff;
+  padding: 11px 14px;
+  min-height: 44px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.skip-animation:hover {
+  border-color: #d89bfa;
+  background: #35213f;
+}
+.descent-note {
+  color: #baa8c7;
+  font-size: 11px;
+  line-height: 1.5;
+  margin: 11px 0 0;
+}
+.descent-fallback {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #17101f;
+}
+.descent-fallback .environment {
+  position: absolute;
+  inset: 0;
+  max-height: none;
+  border: 0;
+  display: flex;
+  align-items: center;
+}
+.descent-fallback > .character-art {
+  position: relative;
+  height: 85%;
+  width: auto;
+  max-width: 45%;
+  object-fit: contain;
+}
+.magic-portal .portal-swirl {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: portal-breathe 2s ease-in-out infinite alternate;
+}
+.magic-portal:not(.active) {
+  opacity: 0.25;
+}
+.descent-stage.has-arrived {
+  box-shadow: 0 0 28px color-mix(in srgb, var(--tier, #bc8bff) 14%, transparent);
+}
+@keyframes portal-breathe {
+  from {
+    opacity: 0.55;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+}
+@media (max-width: 600px) {
+  .descent-depth {
+    font-size: 8px;
+    letter-spacing: 0.7px;
+    padding: 22px 10px 9px;
+  }
+  .descent-controls > span {
+    font-size: 9px;
+  }
+  .skip-animation {
+    padding: 10px 12px;
+  }
+  .reveal-copy {
+    padding-top: 18px;
+  }
+  .descent-stage {
+    border-radius: 7px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .magic-portal .portal-swirl {
     animation: none !important;
   }
 }
