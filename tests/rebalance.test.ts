@@ -76,7 +76,7 @@ test("all fifteen categories have comparable depth and a real answer at every sc
   assert.ok(Math.max(...counts) / Math.min(...counts) <= 1.5);
   for (const q of QUESTIONS) {
     assert.ok(q.answers.length >= 25 && q.answers.length <= 40, q.id);
-    for (const tier of [1, 2, 3, 4, 5])
+    for (const tier of [1, 2, 3, 4])
       assert.ok(
         q.answers.some((a) => a.tier === tier),
         `${q.id}:tier${tier}`,

@@ -7,6 +7,8 @@ import {
   challengeNumber,
   dailyQuestions,
   evaluate,
+  resultTier,
+  tierInfo,
   newGame,
   shareText,
   submit,
@@ -271,7 +273,7 @@ export default function Game() {
     if (outcome === "manual") setShareFallback(text);
   }
   const result = game?.results[game.index];
-  const tier = result?.tier;
+  const tier = resultTier(result);
   const current = game ? dailyQuestions(game.date)[game.index] : null;
   const seconds = game
     ? Math.min(25, Math.max(0, Math.ceil((game.deadline - now) / 1000)))
@@ -498,7 +500,7 @@ export default function Game() {
             <div className="distribution" aria-label="Rarity distribution">
               {TIERS.map((t, i) => {
                 const count = game.results.filter(
-                  (r) => r.tier === i + 1,
+                  (r) => resultTier(r) === i + 1,
                 ).length;
                 return (
                   <div
@@ -527,10 +529,10 @@ export default function Game() {
                   </div>
                   <span
                     className="result-tier"
-                    style={{ color: r.tier ? TIERS[r.tier - 1].color : "#999" }}
+                    style={{ color: tierInfo(r)?.color ?? "#999" }}
                   >
                     {r.tier
-                      ? TIERS[r.tier - 1].name
+                      ? tierInfo(r)?.name
                       : r.timedOut
                         ? "Time’s up"
                         : "Unmatched"}

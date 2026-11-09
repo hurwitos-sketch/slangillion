@@ -23,14 +23,14 @@ test("UTC days and deterministic seven unique prompts", () => {
 test("normalization and curated variants", () => {
   assert.equal(normalize("  THE   Bee’s KNEES!! "), "the bees knees");
   assert.equal(evaluate("excellent", "  THE Bee’s KNEES!! ").points, 50);
-  assert.equal(evaluate("money", "spondulix").points, 75);
-  assert.equal(evaluate("money", "GuAp").points, 25);
-  assert.equal(evaluate("rich", "well-heeled").points, 25);
+  assert.equal(evaluate("money", "spondulix").points, 85);
+  assert.equal(evaluate("money", "GuAp").points, 50);
+  assert.equal(evaluate("rich", "well-heeled").points, 50);
   assert.equal(evaluate("money", "totally invented").points, 0);
   assert.equal(evaluate("money", "  ").points, 0);
   assert.equal(evaluate("money", "!!!").points, 0);
 });
-test("all five tiers score exactly and all questions have useful banks", () => {
+test("all four tiers score exactly and all questions have useful banks", () => {
   assert.ok(QUESTIONS.length >= 15);
   for (const q of QUESTIONS) {
     assert.ok(q.answers.length >= 5);
@@ -39,7 +39,7 @@ test("all five tiers score exactly and all questions have useful banks", () => {
       assert.equal(evaluate(q.id, a.canonical).tier, a.tier);
     }
   }
-  for (let i = 0; i < 5; i++)
+  for (let i = 0; i < 4; i++)
     assert.equal(
       evaluate(
         "money",
@@ -63,7 +63,7 @@ test("seven rounds, maximum score, persistence, completion and share", () => {
     const q = dailyQuestions(s.date)[i];
     s = submit(
       s,
-      q.answers.find((a) => a.tier === 5)!.canonical,
+      q.answers.find((a) => a.tier === 4)!.canonical,
       1001 + i * 100,
     );
     assert.equal(s.index, i);

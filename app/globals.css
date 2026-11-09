@@ -664,10 +664,10 @@ footer i {
   color: #54c9ff;
 }
 .env-3 {
-  color: #bc8bff;
+  color: #ff9a50;
 }
 .env-4 {
-  color: #ff9a50;
+  color: #ff547b;
 }
 .env-5 {
   color: #ff547b;
@@ -675,10 +675,10 @@ footer i {
 .reveal {
   animation: reveal 0.4s ease-out;
 }
-.tier-5 .environment {
+.tier-4 .environment {
   box-shadow: 0 0 50px #ff547b22;
 }
-.tier-5 .reveal-copy h2 {
+.tier-4 .reveal-copy h2 {
   text-shadow: 0 0 18px #ff547b77;
 }
 .loading {

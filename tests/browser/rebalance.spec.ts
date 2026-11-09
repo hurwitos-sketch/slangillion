@@ -63,7 +63,7 @@ for (const row of [
       (date) => JSON.parse(localStorage.getItem(`slangillion:v1:${date}`)!),
       state.date,
     );
-    expect(saved.results.at(-1).recognitionVersion).toBe(3);
+    expect(saved.results.at(-1).recognitionVersion).toBe(4);
     expect(saved.results.at(-1).points).toBeGreaterThan(0);
     expect(saved.results.length).toBe(state.results.length + 1);
   });

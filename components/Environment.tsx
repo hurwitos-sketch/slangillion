@@ -1,6 +1,6 @@
 import type { Tier } from "@/lib/data";
 export default function Environment({
-  tier = 5,
+  tier = 4,
   hero = false,
 }: {
   tier?: Tier;
@@ -85,7 +85,7 @@ export default function Environment({
             ))}
             <path d="M0 285H640M0 300H640" stroke="currentColor" opacity=".5" />
           </>
-        ) : tier === 3 || tier === 4 ? (
+        ) : tier === 3 ? (
           <>
             <path
               d="M0 0H640V330L565 210 530 270 480 115 420 70 360 120 310 40 250 140 180 100 110 230 50 190 0 330Z"
@@ -176,7 +176,7 @@ export default function Environment({
         <path d="M20 315H620" stroke="currentColor" strokeOpacity=".15" />
       </svg>
       <span className="art-coordinate">
-        DEPTH {String(tier * 200).padStart(4, "0")}M ↓
+        DEPTH {String([0, 200, 600, 1000][tier - 1]).padStart(4, "0")}M ↓
       </span>
     </div>
   );

@@ -1,5 +1,6 @@
 import { normalize } from "./normalization";
-import type { Tier } from "./legacy-data";
+import type { Tier as SourceTier } from "./legacy-data";
+import { TIERS, type Tier } from "./tiers";
 export type SlangEntry = {
   question: string;
   canonical: string;
@@ -14,7 +15,7 @@ export type SlangEntry = {
 // Curated slang, idioms and friendly forms of address. No automatic quotas,
 // frequency claims, or assumptions that an unfamiliar region merits more points.
 // Canonical | aliases. Aliases always inherit the canonical tier and score.
-const groups: Record<string, [Tier, string[]][]> = {
+const groups: Record<string, [SourceTier, string[]][]> = {
   money: [
     [
       1,
@@ -919,7 +920,7 @@ const groups: Record<string, [Tier, string[]][]> = {
     ],
   ],
 };
-const scoreReviews: Record<string, Tier> = {
+const scoreReviews: Record<string, SourceTier> = {
   "money:dead presidents": 5,
   "friend:ride or die": 5,
   "friend:jit": 3,
@@ -973,6 +974,23 @@ const communitySources: Record<string, string> = {
   "laughing:lol":
     "https://github.com/dinoducktank/slang_dictionary/blob/main/dictionary.py",
 };
+export const UNDERGROUND_ANSWERS: Record<string, string> = {
+  money: "dead presidents",
+  friend: "ride or die",
+  attractive: "face card never declines",
+  leaving: "pull a houdini",
+  lying: "selling dreams",
+  excellent: "different gravy",
+  angry: "crash out",
+  tired: "cream crackered",
+  rich: "laughing all the way to the bank",
+  poor: "financially cooked",
+  partying: "getting crunk",
+  laughing: "omegalul",
+  talking: "spill the tea",
+  "showing off": "humblebrag",
+  embarrassing: "walk of shame",
+};
 export const SLANG_BANK: SlangEntry[] = Object.entries(groups).flatMap(
   ([question, tiers]) =>
     tiers.flatMap(([tier, rows]) =>
@@ -986,12 +1004,20 @@ export const SLANG_BANK: SlangEntry[] = Object.entries(groups).flatMap(
           return true;
         });
         const source = communitySources[`${question}:${canonical}`];
-        const reviewedTier = scoreReviews[`${question}:${canonical}`] ?? tier;
+        const sourceTier = scoreReviews[`${question}:${canonical}`] ?? tier;
+        const reviewedTier: Tier =
+          UNDERGROUND_ANSWERS[question] === canonical
+            ? 4
+            : sourceTier === 1
+              ? 1
+              : sourceTier <= 3
+                ? 2
+                : 3;
         return {
           question,
           canonical,
           tier: reviewedTier,
-          points: [10, 25, 50, 75, 100][reviewedTier - 1],
+          points: TIERS[reviewedTier - 1].points,
           aliases,
           explanation:
             meanings[`${question}:${canonical}`] ??

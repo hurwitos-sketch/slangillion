@@ -2,16 +2,18 @@ import { QUESTIONS, type Tier } from "./data";
 import { QUESTIONS as LEGACY_QUESTIONS } from "./legacy-data";
 import { recognize } from "./recognition";
 import { recognize as recognizeV2 } from "./recognition-v2";
+import { recognize as recognizeV3 } from "./recognition-v3";
+import { TIERS } from "./tiers";
 export { normalize } from "./recognition";
 export const ROUND_MS = 25_000;
 export type Result = {
   questionId: string;
   answer: string;
   canonical: string | null;
-  tier: Tier | null;
+  tier: Tier | 5 | null;
   points: number;
   timedOut: boolean;
-  recognitionVersion?: 2 | 3;
+  recognitionVersion?: 2 | 3 | 4;
 };
 export type GameState = {
   version: 1 | 2;
@@ -55,7 +57,7 @@ export function evaluate(
     tier: a?.tier ?? null,
     points: a?.points ?? 0,
     timedOut,
-    recognitionVersion: 3,
+    recognitionVersion: 4,
   };
 }
 function evaluateV2(
@@ -73,6 +75,37 @@ function evaluateV2(
     timedOut,
     recognitionVersion: 2,
   };
+}
+function evaluateV3(
+  questionId: string,
+  input: string,
+  timedOut: boolean,
+): Result {
+  const a = timedOut ? undefined : recognizeV3(questionId, input)?.answer;
+  return {
+    questionId,
+    answer: input,
+    canonical: a?.canonical ?? null,
+    tier: a?.tier ?? null,
+    points: a?.points ?? 0,
+    timedOut,
+    recognitionVersion: 3,
+  };
+}
+export function resultTier(result: Result | undefined): Tier | null {
+  if (!result?.tier) return null;
+  if (result.recognitionVersion === 4) return result.tier as Tier;
+  return result.tier === 5
+    ? 4
+    : result.tier === 4
+      ? 3
+      : result.tier === 3
+        ? 2
+        : result.tier;
+}
+export function tierInfo(result: Result) {
+  const tier = resultTier(result);
+  return tier ? TIERS[tier - 1] : null;
 }
 // Original stored rounds are validated against their original editorial scores.
 // They are never rescored or erased when the current bank changes.
@@ -168,15 +201,18 @@ export function restore(raw: string | null, date: string): GameState | null {
       if (
         r.recognitionVersion !== undefined &&
         r.recognitionVersion !== 2 &&
-        r.recognitionVersion !== 3
+        r.recognitionVersion !== 3 &&
+        r.recognitionVersion !== 4
       )
         return null;
       const checked =
-        r.recognitionVersion === 3
+        r.recognitionVersion === 4
           ? evaluate(r.questionId, r.answer, r.timedOut)
-          : r.recognitionVersion === 2
-            ? evaluateV2(r.questionId, r.answer, r.timedOut)
-            : evaluateLegacy(r.questionId, r.answer, r.timedOut);
+          : r.recognitionVersion === 3
+            ? evaluateV3(r.questionId, r.answer, r.timedOut)
+            : r.recognitionVersion === 2
+              ? evaluateV2(r.questionId, r.answer, r.timedOut)
+              : evaluateLegacy(r.questionId, r.answer, r.timedOut);
       if (r.recognitionVersion !== undefined && !r.timedOut && !checked.tier)
         return null;
       if (
@@ -211,6 +247,11 @@ export function reconcileProgress(
   return JSON.stringify(local) === JSON.stringify(stored) ? local : stored;
 }
 export function shareText(s: GameState, url: string) {
-  const icons = ["🩶", "🩵", "💜", "🧡", "❤️"];
-  return `SLANGILLION #${String(challengeNumber(s.date)).padStart(3, "0")}\nHow deep is your slang?\nScore: ${total(s)}/700\n${s.results.map((r) => (r.tier ? icons[r.tier - 1] : "⬛")).join(" ")}\nCan you go deeper?\n${url}`;
+  const icons = ["🩶", "🩵", "🧡", "❤️"];
+  return `SLANGILLION #${String(challengeNumber(s.date)).padStart(3, "0")}\nHow deep is your slang?\nScore: ${total(s)}/700\n${s.results
+    .map((r) => {
+      const tier = resultTier(r);
+      return tier ? icons[tier - 1] : "⬛";
+    })
+    .join(" ")}\nCan you go deeper?\n${url}`;
 }

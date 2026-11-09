@@ -20,7 +20,7 @@ test("complete daily game, resume, all reveals and clipboard fallback", async ({
   await page.getByRole("button", { name: "Lock it in" }).click();
   await expect(page.getByRole("status")).toContainText("Enter an expression");
   for (let i = 0; i < 7; i++) {
-    const tier = i < 5 ? i + 1 : 1;
+    const tier = i < 4 ? i + 1 : 1;
     const answer = questions[i].answers.find((a) => a.tier === tier)!.canonical;
     if (i === 0) {
       const deadline = await page.evaluate(
@@ -71,17 +71,17 @@ test("complete daily game, resume, all reveals and clipboard fallback", async ({
     await expect(page.getByRole("main").getByRole("alert")).toHaveCount(0);
     await page.getByLabel("Your slang expression").press("Enter");
     await expect(page.locator(".points")).toContainText(
-      `+${[10, 25, 50, 75, 100][tier - 1]}`,
+      `+${[20, 50, 85, 100][tier - 1]}`,
     );
     await page
       .getByRole("button", { name: i === 6 ? "See my results" : "Next round" })
       .click();
   }
-  await expect(page.locator(".final-score")).toContainText("280");
+  await expect(page.locator(".final-score")).toContainText("315");
   await expect(page.locator(".result-list>div")).toHaveCount(7);
   await page.reload();
   await page.getByRole("button", { name: /RESUME DAILY|VIEW RESULTS/ }).click();
-  await expect(page.locator(".final-score")).toContainText("280");
+  await expect(page.locator(".final-score")).toContainText("315");
   await expect(page.getByRole("button", { name: "Play Daily" })).toHaveCount(0);
   await page.evaluate(() =>
     Object.defineProperty(navigator, "share", {
@@ -92,7 +92,7 @@ test("complete daily game, resume, all reveals and clipboard fallback", async ({
   await page.getByRole("button", { name: "Share your depth" }).click();
   await expect(page.getByRole("status")).toContainText("Results copied");
   expect(await page.evaluate(() => navigator.clipboard.readText())).toContain(
-    "Score: 280/700",
+    "Score: 315/700",
   );
   expect(
     await page.evaluate(
@@ -281,7 +281,7 @@ test("storage failures keep the game playable and show an honest warning", async
     .getByLabel("Your slang expression")
     .fill(dailyQuestions(date)[0].answers[0].canonical);
   await page.getByLabel("Your slang expression").press("Enter");
-  await expect(page.locator(".points")).toContainText("+10");
+  await expect(page.locator(".points")).toContainText("+20");
 });
 
 test("multiple tabs share locked answers without duplicating points", async ({
@@ -299,7 +299,7 @@ test("multiple tabs share locked answers without duplicating points", async ({
     .getByLabel("Your slang expression")
     .fill(dailyQuestions(date)[0].answers[0].canonical);
   await page.getByLabel("Your slang expression").press("Enter");
-  await expect(other.locator(".points")).toContainText("+10");
+  await expect(other.locator(".points")).toContainText("+20");
   await other.getByRole("button", { name: "Next round" }).click();
   await expect(page.locator(".game-top")).toContainText("ROUND 2 OF 7");
   expect(
