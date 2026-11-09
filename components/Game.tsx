@@ -361,13 +361,6 @@ export default function Game() {
           />
         ) : game.phase === "answer" ? (
           <section className="game-panel game-entry">
-            <div className="game-companion">
-              <CharacterArt id={selectedCharacter} />
-              <span>
-                {getCharacter(selectedCharacter).name}{" "}
-                <small>IS ON THE DESCENT</small>
-              </span>
-            </div>
             <div className="game-top">
               <span>
                 DAILY #{number} <i>/</i> ROUND {game.index + 1} OF 7
@@ -377,74 +370,106 @@ export default function Game() {
               </strong>
             </div>
             <Progress index={game.index} />
-            <div className={`timer ${seconds <= 5 ? "urgent" : ""}`}>
-              <svg viewBox="0 0 60 60">
-                <circle cx="30" cy="30" r="26" />
-                <circle
-                  cx="30"
-                  cy="30"
-                  r="26"
-                  style={{
-                    strokeDasharray: 164,
-                    strokeDashoffset: 164 * (1 - seconds / 25),
-                  }}
+            <div className="station-scene">
+              <div className="station-scenery" aria-hidden="true">
+                <Image
+                  src="/art/descent/subway.webp"
+                  alt=""
+                  fill
+                  sizes="(max-width: 640px) 100vw, 680px"
+                  unoptimized
                 />
-              </svg>
-              <strong>{seconds}</strong>
-              <span>SECONDS</span>
-            </div>
-            <div className="eyebrow">NAME A SLANG EXPRESSION FOR</div>
-            <h1 className="prompt">{current?.label}</h1>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                lock();
-              }}
-            >
-              <label htmlFor="answer" className="sr-only">
-                Your slang expression
-              </label>
-              <input
-                ref={inputRef}
-                id="answer"
-                value={answer}
-                onChange={(e) => {
-                  setAnswer(e.target.value);
-                  setAnswerError("");
-                  setReported(false);
-                  if (notice === "Enter an expression before submitting.")
-                    setNotice("");
-                }}
-                aria-invalid={!!answerError}
-                aria-describedby={answerError ? "answer-error" : undefined}
-                maxLength={80}
-                autoComplete="off"
-                autoCapitalize="none"
-                spellCheck={false}
-                placeholder="Go beyond the obvious…"
-              />
-              {answerError && (
-                <p id="answer-error" className="rejection" role="alert">
-                  {answerError}
-                </p>
-              )}
-              <button className="primary" type="submit">
-                Lock it in{" "}
-                <span>
-                  <Arrow down />
+              </div>
+              <div className="station-sign">
+                <span className="station-line" aria-hidden="true">
+                  ↓
                 </span>
-              </button>
-            </form>
-            {answerError && (
-              <button
-                className="text-button"
-                onClick={report}
-                disabled={reported}
+                <div className="eyebrow">Give a slang expression for…</div>
+                <h1 className="prompt">{current?.label}</h1>
+                <div className="station-sign-footer" aria-hidden="true">
+                  SLANGILLION TRANSIT <span>↓ DIG DEEPER</span>
+                </div>
+              </div>
+              <div className="station-companion">
+                <CharacterArt id={selectedCharacter} />
+                <span>{getCharacter(selectedCharacter).name}</span>
+              </div>
+            </div>
+            <div className="answer-station">
+              <div className="station-console-top">
+                <span className="station-terminal">
+                  EXPRESSION TERMINAL{" "}
+                  <small> / {String(game.index + 1).padStart(2, "0")}</small>
+                </span>
+                <div
+                  className={`station-clock ${seconds <= 5 ? "urgent" : ""}`}
+                  role="timer"
+                  aria-label={`${seconds} seconds remaining`}
+                >
+                  <span className="station-clock-light" aria-hidden="true" />
+                  <strong>{String(seconds).padStart(2, "0")}</strong>
+                  <span>SEC</span>
+                  <span className="station-clock-gauge" aria-hidden="true">
+                    <span style={{ transform: `scaleX(${seconds / 25})` }} />
+                  </span>
+                </div>
+              </div>
+              <form
+                className="station-form"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  lock();
+                }}
               >
-                {reported ? "Feedback saved ✓" : "My answer should count"}
-              </button>
-            )}
-            <p className="hint">ONE LOCKED ANSWER. KEEP DIGGING.</p>
+                <label htmlFor="answer" className="station-input-label">
+                  Your slang expression
+                </label>
+                <input
+                  ref={inputRef}
+                  id="answer"
+                  value={answer}
+                  onChange={(e) => {
+                    setAnswer(e.target.value);
+                    setAnswerError("");
+                    setReported(false);
+                    if (notice === "Enter an expression before submitting.")
+                      setNotice("");
+                  }}
+                  aria-invalid={!!answerError}
+                  aria-describedby={answerError ? "answer-error" : undefined}
+                  maxLength={80}
+                  autoComplete="off"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  placeholder="Drop your slang…"
+                  enterKeyHint="send"
+                />
+                {answerError && (
+                  <p id="answer-error" className="rejection" role="alert">
+                    {answerError}
+                  </p>
+                )}
+                <button className="primary station-submit" type="submit">
+                  Lock it in{" "}
+                  <span>
+                    <Arrow down />
+                  </span>
+                </button>
+                <span className="station-key-hint" aria-hidden="true">
+                  <kbd>↵</kbd> Enter to lock in
+                </span>
+              </form>
+              {answerError && (
+                <button
+                  className="text-button"
+                  onClick={report}
+                  disabled={reported}
+                >
+                  {reported ? "Feedback saved ✓" : "My answer should count"}
+                </button>
+              )}
+              <p className="hint">ONE LOCKED ANSWER. KEEP DIGGING.</p>
+            </div>
           </section>
         ) : game.phase === "reveal" ? (
           <section

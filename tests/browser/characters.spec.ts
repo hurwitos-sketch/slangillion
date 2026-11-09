@@ -40,7 +40,7 @@ test("all eight selections update preview, names, and persistence without starti
   ).toBeChecked();
   await expect(page.getByTestId("selected-character-name")).toHaveText("ECHO");
   await page.getByRole("button", { name: "PLAY DAILY" }).click();
-  await expect(page.locator(".game-companion img")).toHaveAttribute(
+  await expect(page.locator(".station-companion img")).toHaveAttribute(
     "alt",
     "ECHO character",
   );
@@ -100,7 +100,7 @@ test("invalid preference defaults safely; blocked storage remains playable", asy
   );
   await page.getByRole("button", { name: "PLAY DAILY" }).click();
   await expect(page.getByLabel("Your slang expression")).toBeVisible();
-  await expect(page.locator(".game-companion img")).toHaveAttribute(
+  await expect(page.locator(".station-companion img")).toHaveAttribute(
     "alt",
     "DJ character",
   );

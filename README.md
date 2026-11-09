@@ -63,3 +63,7 @@ The welcome action becomes **RESUME DAILY** for an unfinished saved challenge or
 Recognized answers launch a short, skippable sprite animation from the city to the stored destination. All eight characters walk the subway stairs, dig into bare caves, break through into ore-rich trenches, and enter a magical portal to the neon music venue when their score reaches 100. Scores are saved before travel. Reduced motion and restored results show the final destination immediately.
 
 [Animation architecture, changed files, validation, screenshots, and recording](docs/descent-animation.md).
+
+## Answer station
+
+The answer-entry screen uses the subway artwork, a destination sign, connected transit stops, and a metal-framed expression terminal. [Design notes, screenshots, and mobile limitations](docs/answer-station.md).
